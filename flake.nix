@@ -7,10 +7,11 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    naersk.url = "github:nix-community/naersk";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { nixpkgs, flake-utils, oxalica, ... }:
+  outputs = { nixpkgs, flake-utils, oxalica, naersk, ... }:
     let
       overlay = import ./overlay.nix {
         inherit oxalica;
@@ -31,8 +32,14 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ overlay ];
+          overlays = [
+            overlay
+            oxalica.overlays.default
+          ];
         };
+        lib = pkgs.lib;
+
+        dojo = (import ./packages/dojo-download.nix { inherit pkgs lib naersk; });
       in
       {
         formatter = pkgs.nixpkgs-fmt;
@@ -51,6 +58,11 @@
           scarb = pkgs.cairo-bin.stable.scarb;
           cairo-beta = pkgs.cairo-bin.beta.cairo;
           scarb-beta = pkgs.cairo-bin.beta.scarb;
+
+          dojo-language-server = dojo.dojo-language-server;
+          katana = dojo.katana;
+          sozo = dojo.sozo;
+          torii = dojo.torii;
         };
       });
 }
