@@ -32,33 +32,69 @@ in
     '';
   };
 
-  katana = pkgs.stdenv.mkDerivation {
+  katana = pkgs.stdenv.mkDerivation rec {
     name = "katana";
     src = artifacts;
-    phases = [ "unpackPhase" "installPhase" ];
+
+    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
+    buildInputs = with pkgs; [ stdenv.cc.cc ];
+
     installPhase = ''
+      runHook preInstall
+
       mkdir -p $out/bin
-      cp katana $out/bin
+      cp ${name} $out/bin
+
+      wrapProgram $out/bin/${name} \
+        --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
+          pkgs.glibc
+       ]}"
+
+      runHook postInstall
     '';
   };
 
-  sozo = pkgs.stdenv.mkDerivation {
+  sozo = pkgs.stdenv.mkDerivation rec {
     name = "sozo";
     src = artifacts;
-    phases = [ "unpackPhase" "installPhase" ];
+
+    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
+    buildInputs = with pkgs; [ stdenv.cc.cc ];
+
     installPhase = ''
+      runHook preInstall
+
       mkdir -p $out/bin
-      cp sozo $out/bin
+      cp ${name} $out/bin
+
+      wrapProgram $out/bin/${name} \
+        --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
+          pkgs.glibc
+       ]}"
+
+      runHook postInstall
     '';
   };
 
-  torii = pkgs.stdenv.mkDerivation {
+  torii = pkgs.stdenv.mkDerivation rec {
     name = "torii";
     src = artifacts;
-    phases = [ "unpackPhase" "installPhase" ];
+
+    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
+    buildInputs = with pkgs; [ stdenv.cc.cc ];
+
     installPhase = ''
+      runHook preInstall
+
       mkdir -p $out/bin
-      cp torii $out/bin
+      cp ${name} $out/bin
+
+      wrapProgram $out/bin/${name} \
+        --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
+          pkgs.glibc
+       ]}"
+
+      runHook postInstall
     '';
   };
 
