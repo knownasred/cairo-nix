@@ -1,7 +1,20 @@
+{ oxalica
+, ...
+}:
 final: prev:
 let
   inherit (final)
-    lib stdenv darwin fetchurl fetchFromGitHub rustPlatform;
+    lib stdenv darwin fetchurl fetchFromGitHub makeRustPlatform;
+
+  newPrev = prev.extend oxalica.overlays.default;
+
+  rust-bin = newPrev.rust-bin;
+
+  rustPlatform = newPrev.makeRustPlatform {
+    cargo = rust-bin.stable."1.76.0".minimal;
+    rustc = rust-bin.stable."1.76.0".minimal;
+  };
+
 
   fetchCairo = { rev, hash }: fetchurl {
     name = "cairo-archive-${rev}";
