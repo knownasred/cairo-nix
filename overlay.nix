@@ -1,88 +1,114 @@
-{ oxalica
-, ...
-}:
-final: prev:
-let
-  inherit (final)
-    lib stdenv darwin fetchurl fetchFromGitHub makeRustPlatform;
+{oxalica, ...}: final: prev: let
+  inherit
+    (final)
+    lib
+    stdenv
+    darwin
+    fetchurl
+    fetchFromGitHub
+    makeRustPlatform
+    ;
 
   newPrev = prev.extend oxalica.overlays.default;
 
   rust-bin = newPrev.rust-bin;
 
   rustPlatform = newPrev.makeRustPlatform {
-    cargo = rust-bin.stable."1.76.0".minimal;
-    rustc = rust-bin.stable."1.76.0".minimal;
+    cargo = rust-bin.stable."1.83.0".minimal;
+    rustc = rust-bin.stable."1.83.0".minimal;
   };
 
+  fetchCairo = {
+    rev,
+    hash,
+  }:
+    fetchurl {
+      name = "cairo-archive-${rev}";
+      url = "https://github.com/starkware-libs/cairo/archive/v${rev}.zip";
+      sha256 = hash;
+      meta = {
+        version = rev;
+      };
+    };
 
-  fetchCairo = { rev, hash }: fetchurl {
-    name = "cairo-archive-${rev}";
-    url = "https://github.com/starkware-libs/cairo/archive/v${rev}.zip";
-    sha256 = hash;
-    meta = {
-      version = rev;
+  mkCairo = {
+    toolchainVersion,
+    cairo,
+    scarb,
+  }: {
+    cairo = rustPlatform.buildRustPackage rec {
+      pname = "cairo";
+      version = cairo.version;
+
+      doCheck = false;
+
+      src = fetchFromGitHub {
+        owner = "starkware-libs";
+        repo = pname;
+        rev = "v${cairo.version}";
+        hash = cairo.srcHash;
+      };
+
+      nativeBuildInputs = with newPrev; [
+        pkg-config
+        openssl
+        perl
+      ];
+
+      # https://discourse.nixos.org/t/rust-openssl-woes/12340
+      PKG_CONFIG_PATH = "${newPrev.openssl.dev}/lib/pkgconfig";
+
+      cargoHash = cairo.cargoHash;
+
+      meta = with lib; {
+        description = "Cairo is the first Turing-complete language for creating provable programs for general computation.";
+        homepage = "https://github.com/starkware-libs/cairo";
+        license = licenses.asl20;
+        maintainers = [];
+      };
+    };
+
+    scarb = rustPlatform.buildRustPackage rec {
+      pname = "scarb";
+      version = scarb.version;
+
+      doCheck = false;
+
+      buildInputs = lib.optional stdenv.isDarwin [
+        darwin.apple_sdk.frameworks.CoreFoundation
+      ];
+
+      src = fetchFromGitHub {
+        owner = "software-mansion";
+        repo = pname;
+        rev = "v${scarb.version}";
+        hash = scarb.srcHash;
+      };
+
+      nativeBuildInputs = with newPrev; [
+        pkg-config
+        openssl
+      ];
+
+      # https://discourse.nixos.org/t/rust-openssl-woes/12340
+      PKG_CONFIG_PATH = "${newPrev.openssl.dev}/lib/pkgconfig";
+
+      cargoHash = scarb.cargoHash;
+      cargoLock = scarb.cargoLock;
+
+      CAIRO_ARCHIVE = fetchCairo {
+        rev = cairo.version;
+        hash = cairo.archiveHash;
+      };
+
+      meta = with lib; {
+        description = "The Cairo package manager";
+        homepage = "http://docs.swmansion.com/scarb/";
+        license = licenses.asl20;
+        maintainers = [];
+      };
     };
   };
-
-  mkCairo = { toolchainVersion, cairo, scarb }:
-    {
-      cairo = rustPlatform.buildRustPackage rec {
-        pname = "cairo";
-        version = cairo.version;
-
-        doCheck = false;
-
-        src = fetchFromGitHub {
-          owner = "starkware-libs";
-          repo = pname;
-          rev = "v${cairo.version}";
-          hash = cairo.srcHash;
-        };
-
-        cargoHash = cairo.cargoHash;
-
-        meta = with lib; {
-          description = "Cairo is the first Turing-complete language for creating provable programs for general computation.";
-          homepage = "https://github.com/starkware-libs/cairo";
-          license = licenses.asl20;
-          maintainers = [ ];
-        };
-      };
-
-      scarb = rustPlatform.buildRustPackage rec {
-        pname = "scarb";
-        version = scarb.version;
-
-        doCheck = false;
-
-        buildInputs = lib.optional stdenv.isDarwin [
-          darwin.apple_sdk.frameworks.CoreFoundation
-        ];
-
-        src = fetchFromGitHub {
-          owner = "software-mansion";
-          repo = pname;
-          rev = "v${scarb.version}";
-          hash = scarb.srcHash;
-        };
-
-        cargoHash = scarb.cargoHash;
-        cargoLock = scarb.cargoLock;
-
-        CAIRO_ARCHIVE = fetchCairo {
-          rev = cairo.version;
-          hash = cairo.archiveHash;
-        };
-
-        meta = with lib; {
-          description = "The Cairo package manager";
-          homepage = "http://docs.swmansion.com/scarb/";
-          license = licenses.asl20;
-          maintainers = [ ];
-        };
-      };
-    };
 
   versions = [
     {
@@ -371,14 +397,37 @@ let
         cargoLock = null;
       };
     }
+    {
+      toolchainVersion = "2.8.4-1";
+
+      cairo = {
+        version = "2.8.4";
+        srcHash = "sha256-xHvBbm1ewNu96TyK//l2emiq+jaPhSWvvbVK9Q/O5lo=";
+        archiveHash = "sha256-kSbvWAra38jZExCCbzz0LZvnk7nTDbmEHNgz3nXlU6g=";
+        cargoHash = "sha256-E6nnT+I5ur4PPvLjwfebR1Tdm206hI05HCVc3IWDqFY=";
+      };
+      scarb = {
+        version = "2.8.4";
+        srcHash = "sha256-mUY7EjuqKh6YeI/BqS+f9lEWf+QhACBSl5cHKEcsOPk=";
+        cargoHash = "sha256-rrxtrQqC8QOKDj2pY1xYBx8Vb8hkfoVY5pVmtStf0jo=";
+        cargoLock = null;
+      };
+    }
   ];
 
-  toolchains =
-    builtins.listToAttrs (builtins.map (v: { name = if v ? toolchainVersion then v.toolchainVersion else v.cairo.version; value = mkCairo v; }) versions);
-in
-{
-  cairo-bin = (toolchains // {
-    stable = toolchains."2.6.3-1";
-    beta = toolchains."2.6.3-1";
-  });
+  toolchains = builtins.listToAttrs (builtins.map (v: {
+      name =
+        if v ? toolchainVersion
+        then v.toolchainVersion
+        else v.cairo.version;
+      value = mkCairo v;
+    })
+    versions);
+in {
+  cairo-bin =
+    toolchains
+    // {
+      stable = toolchains."2.8.4-1";
+      beta = toolchains."2.8.4-1";
+    };
 }
