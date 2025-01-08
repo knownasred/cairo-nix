@@ -49,14 +49,14 @@
         hash = cairo.srcHash;
       };
 
-      nativeBuildInputs = with newPrev; [
+      nativeBuildInputs = with final; [
         pkg-config
         openssl
         perl
       ];
 
       # https://discourse.nixos.org/t/rust-openssl-woes/12340
-      PKG_CONFIG_PATH = "${newPrev.openssl.dev}/lib/pkgconfig";
+      PKG_CONFIG_PATH = "${final.openssl.dev}/lib/pkgconfig";
 
       cargoHash = cairo.cargoHash;
 
@@ -85,13 +85,13 @@
         hash = scarb.srcHash;
       };
 
-      nativeBuildInputs = with newPrev; [
+      nativeBuildInputs = with final; [
         pkg-config
         openssl
       ];
 
       # https://discourse.nixos.org/t/rust-openssl-woes/12340
-      PKG_CONFIG_PATH = "${newPrev.openssl.dev}/lib/pkgconfig";
+      PKG_CONFIG_PATH = "${final.openssl.dev}/lib/pkgconfig";
 
       cargoHash = scarb.cargoHash;
       cargoLock = scarb.cargoLock;
