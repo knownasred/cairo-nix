@@ -143,7 +143,7 @@ in {
             if name == "all"
             then "dojo_${versionName}"
             else "${name}_${versionName}";
-          value = mkDojo v;
+          value = toolchains.${v.version}.${name};
         }) [
           "all"
           "dojo-language-server"
