@@ -60,6 +60,18 @@
           ${pkgs.patch}/bin/patch --directory $BUILD_METADATA_DIR -p1 < ${patchMetadata}
           echo "Applying patch for scarb"
           ${pkgs.patch}/bin/patch --directory $BUILD_SCARB_DIR -p1 < ${patchScarb}
+
+          # Similarly we can also run additional hooks to make changes
+          echo "=========="
+          # We need to find the version
+          SCARB_VERSION=$(echo $BUILD_SCARB_DIR | sed -En 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+          echo "SCARB: " $SCARB_VERSION
+          CAIRO_VERSION=$(${pkgs.toml-cli}/bin/toml get ./Cargo.lock '.' | ${pkgs.jq}/bin/jq '.package[] | select(.name == "cairo-lang-compiler").version' -r)
+          echo "CAIRO: " $CAIRO_VERSION
+
+          sed -i -e "s/{{cairo_version}}/$CAIRO_VERSION/g" $BUILD_METADATA_DIR/build.rs
+          sed -i -e "s/{{version}}/$SCARB_VERSION/g" $BUILD_METADATA_DIR/build.rs
+          echo "=========="
         '';
 
         installPhase = "cp -R ./ $out";
