@@ -55,6 +55,7 @@
         patchPhase = ''
           BUILD_METADATA_DIR=$(echo ./*/scarb-build-metadata-*)
           BUILD_SCARB_DIR=$(echo ./*/scarb-[0-9]*)
+
           echo "Applying patch for scarb-build-metadata"
           ${pkgs.patch}/bin/patch --directory $BUILD_METADATA_DIR -p1 < ${patchMetadata}
           echo "Applying patch for scarb"
@@ -63,29 +64,37 @@
 
         installPhase = "cp -R ./ $out";
       };
+    commonBuild = rustPlatform.buildRustPackage {
+      inherit src cargoDeps;
+
+      nativeBuildInputs = with pkgs; [
+        pkg-config
+
+        openssl
+
+        rustPlatform.bindgenHook
+        libclang
+
+        protobuf
+      ];
+
+      # For scarb builds
+      CAIRO_ARCHIVE = "${cairo-zip}";
+
+      name = "dojo-${version}-build";
+    };
 
     buildCrate = name:
-      rustPlatform.buildRustPackage {
-        inherit src cargoDeps;
-
-        nativeBuildInputs = with pkgs; [
-          pkg-config
-
-          openssl
-
-          rustPlatform.bindgenHook
-          libclang
-
-          protobuf
-        ];
-
-        # For scarb builds
-        CAIRO_ARCHIVE = "${cairo-zip}";
+      pkgs.stdenv.mkDerivation {
+        # TODO: Copy just the wanted executable (let's reuse caching)
+        src = commonBuild;
 
         name = name;
+        pname = name;
 
-        cargoBuildOptions = ["-p" name];
-        cargoTestOptions = ["-p" name];
+        installPhase = ''
+          cp ./bin/${name} $out/bin/${name}
+        '';
       };
   in {
     dojo-language-server = buildCrate "dojo-language-server";
