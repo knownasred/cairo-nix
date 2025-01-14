@@ -1,0 +1,13 @@
+diff --git a/build.rs b/build.rs
+index bfab290..845fa1e 100644
+--- a/build.rs
++++ b/build.rs
+@@ -61,7 +61,7 @@ fn obtain_core(rev: &str) {
+
+ fn download_remote(cairo_zip: &Path, rev: &str) {
+     let url: String = format!("https://github.com/starkware-libs/cairo/archive/{rev}.zip");
+-    let mut curl = Command::new("curl");
++    let mut curl = Command::new("@curl@");
+     curl.args(["--proto", "=https", "--tlsv1.2", "-fL"]);
+     curl.arg("-o");
+     curl.arg(cairo_zip);
