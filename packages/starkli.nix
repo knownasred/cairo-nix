@@ -36,9 +36,9 @@ in
     cargoDepsHook = ''
       fixStarknetLints() {
         echo cargoDepsCopy=$cargoDepsCopy
-        sed -i '/workspace = true/d' $cargoDepsCopy/starknet*/Cargo.toml
+        sed -i '/workspace = true/d' $cargoDepsCopy/*/starknet*/Cargo.toml
         # Remove all lints.
-        sed -n '/\[workspace.lints\]/q;p' $cargoDepsCopy/starknet-0.12.0/Cargo.toml
+        sed -n '/\[workspace.lints\]/q;p' $cargoDepsCopy/*/starknet-0.12.0/Cargo.toml
       }
       prePatchHooks+=(fixStarknetLints)
     '';
