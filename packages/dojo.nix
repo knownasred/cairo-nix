@@ -111,7 +111,8 @@
         pname = name;
 
         installPhase = ''
-          cp ./bin/${name} $out/bin/${name}
+          mkdir $out/bin
+          cp $src/bin/${name} $out/bin/${name}
         '';
       };
   in {
