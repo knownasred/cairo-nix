@@ -38,8 +38,7 @@
 
           openssl
 
-          clangStdenv
-          libclang.lib
+          rustPlatform.bindgenHook
 
           protobuf
         ];
