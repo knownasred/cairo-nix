@@ -78,6 +78,10 @@
 
           protobuf
         ];
+
+        # For scarb builds
+        CAIRO_ARCHIVE = "${cairo-zip}";
+
         name = name;
 
         cargoBuildOptions = ["-p" name];
