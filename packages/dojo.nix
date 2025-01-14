@@ -82,12 +82,15 @@
       nativeBuildInputs = with pkgs; [
         pkg-config
 
-        openssl
-
         rustPlatform.bindgenHook
+
         libclang
 
         protobuf
+      ];
+
+      buildInputs = with pkgs; [
+        openssl
       ];
 
       # For scarb builds
