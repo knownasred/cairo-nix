@@ -37,7 +37,8 @@
           pkg-config
 
           openssl
-          libclang
+
+          clangStdenv
           libclang.lib
 
           protobuf
