@@ -58,7 +58,6 @@
 
       inherit (pkgs) lib;
 
-      dojo = import ./packages/dojo-download.nix {inherit pkgs lib naersk;};
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
     in {
       formatter = pkgs.nixpkgs-fmt;
@@ -71,21 +70,22 @@
         ];
       };
 
-      packages = {
-        default = pkgs.cairo-bin.stable.scarb;
-        inherit (pkgs.cairo-bin.stable) cairo;
-        inherit (pkgs.cairo-bin.stable) scarb;
-        cairo-beta = pkgs.cairo-bin.beta.cairo;
-        scarb-beta = pkgs.cairo-bin.beta.scarb;
-
-        sozo-git = dojo-git.dojo."1.0.8".sozo;
-
-        starkli = import ./packages/starkli.nix {inherit pkgs lib;};
-
-        inherit (dojo) dojo-language-server;
-        inherit (dojo) katana;
-        inherit (dojo) sozo;
-        inherit (dojo) torii;
+      legacyPackages = {
+        inherit (dojo-git) dojo;
       };
+
+      packages =
+        dojo-git.dojo."1.0.8"
+        // {
+          default = pkgs.cairo-bin.stable.scarb;
+          inherit (pkgs.cairo-bin.stable) cairo scarb;
+
+          cairo-beta = pkgs.cairo-bin.beta.cairo;
+          scarb-beta = pkgs.cairo-bin.beta.scarb;
+
+          sozo-git = dojo-git.dojo."1.0.8".sozo;
+
+          starkli = import ./packages/starkli.nix {inherit pkgs lib;};
+        };
     });
 }

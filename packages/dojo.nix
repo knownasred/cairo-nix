@@ -133,5 +133,9 @@
     })
     versions);
 in {
-  dojo = toolchains;
+  dojo =
+    toolchains
+    // {
+      stable = toolchains."1.0.10";
+    };
 }
