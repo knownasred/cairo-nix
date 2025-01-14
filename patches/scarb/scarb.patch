@@ -9,7 +9,7 @@ index bfab290..f44e6cf 100644
 -        if let Ok(cairo_archive) = env::var("CAIRO_ARCHIVE") {
 +        let archive = Some("@cairoZip@");
 +
-+        if let Ok(cairo_archive) = archive {
++        if let Some(cairo_archive) = archive {
              // If `CAIRO_ARCHIVE` env variable is specified, prefer it.
              // Copy archive to `cairo_zip`, without keeping file attributes.
              eprintln!("Copying Cairo archive from `CAIRO_ARCHIVE={cairo_archive}`.");
