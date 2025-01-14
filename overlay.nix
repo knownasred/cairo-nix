@@ -11,7 +11,7 @@
 
   newPrev = prev.extend oxalica.overlays.default;
 
-  rust-bin = newPrev.rust-bin;
+  inherit (newPrev) rust-bin;
 
   rustPlatform = newPrev.makeRustPlatform {
     cargo = rust-bin.stable."1.83.0".minimal;
@@ -38,7 +38,7 @@
   }: {
     cairo = rustPlatform.buildRustPackage rec {
       pname = "cairo";
-      version = cairo.version;
+      inherit (cairo) version;
 
       doCheck = false;
 
@@ -58,7 +58,7 @@
       # https://discourse.nixos.org/t/rust-openssl-woes/12340
       PKG_CONFIG_PATH = "${final.openssl.dev}/lib/pkgconfig";
 
-      cargoHash = cairo.cargoHash;
+      inherit (cairo) cargoHash;
 
       meta = with lib; {
         description = "Cairo is the first Turing-complete language for creating provable programs for general computation.";
@@ -70,7 +70,7 @@
 
     scarb = rustPlatform.buildRustPackage rec {
       pname = "scarb";
-      version = scarb.version;
+      inherit (scarb) version;
 
       doCheck = false;
 
@@ -93,8 +93,8 @@
       # https://discourse.nixos.org/t/rust-openssl-woes/12340
       PKG_CONFIG_PATH = "${final.openssl.dev}/lib/pkgconfig";
 
-      cargoHash = scarb.cargoHash;
-      cargoLock = scarb.cargoLock;
+      inherit (scarb) cargoHash;
+      inherit (scarb) cargoLock;
 
       CAIRO_ARCHIVE = fetchCairo {
         rev = cairo.version;
@@ -417,9 +417,7 @@
 
   toolchains = builtins.listToAttrs (builtins.map (v: {
       name =
-        if v ? toolchainVersion
-        then v.toolchainVersion
-        else v.cairo.version;
+        v.toolchainVersion or v.cairo.version;
       value = mkCairo v;
     })
     versions);

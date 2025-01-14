@@ -104,10 +104,11 @@
 
     buildCrate = name:
       pkgs.stdenv.mkDerivation {
+        inherit name;
+
         # TODO: Copy just the wanted executable (let's reuse caching)
         src = commonBuild;
 
-        name = name;
         pname = name;
 
         installPhase = ''

@@ -56,7 +56,7 @@
         ];
       };
 
-      lib = pkgs.lib;
+      inherit (pkgs) lib;
 
       dojo = import ./packages/dojo-download.nix {inherit pkgs lib naersk;};
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
@@ -73,8 +73,8 @@
 
       packages = {
         default = pkgs.cairo-bin.stable.scarb;
-        cairo = pkgs.cairo-bin.stable.cairo;
-        scarb = pkgs.cairo-bin.stable.scarb;
+        inherit (pkgs.cairo-bin.stable) cairo;
+        inherit (pkgs.cairo-bin.stable) scarb;
         cairo-beta = pkgs.cairo-bin.beta.cairo;
         scarb-beta = pkgs.cairo-bin.beta.scarb;
 
@@ -82,10 +82,10 @@
 
         starkli = import ./packages/starkli.nix {inherit pkgs lib;};
 
-        dojo-language-server = dojo.dojo-language-server;
-        katana = dojo.katana;
-        sozo = dojo.sozo;
-        torii = dojo.torii;
+        inherit (dojo) dojo-language-server;
+        inherit (dojo) katana;
+        inherit (dojo) sozo;
+        inherit (dojo) torii;
       };
     });
 }
