@@ -1,0 +1,15 @@
+diff --git a/build.rs b/build.rs
+index bfab290..f44e6cf 100644
+--- a/build.rs
++++ b/build.rs
+@@ -32,7 +32,9 @@ fn obtain_core(rev: &str) {
+     let core_path = PathBuf::from_iter([&out_dir, &format!("core-{}", ident(rev))]);
+     if !core_path.is_dir() {
+         let cairo_zip: PathBuf = PathBuf::from_iter([&out_dir, "cairo.zip"]);
+-        if let Ok(cairo_archive) = env::var("CAIRO_ARCHIVE") {
++        let archive = Some("@cairoZip@");
++
++        if let Some(cairo_archive) = archive {
+             // If `CAIRO_ARCHIVE` env variable is specified, prefer it.
+             // Copy archive to `cairo_zip`, without keeping file attributes.
+             eprintln!("Copying Cairo archive from `CAIRO_ARCHIVE={cairo_archive}`.");

@@ -1,88 +1,136 @@
-{ lib
-, pkgs
-, naersk
-, ...
-}:
-let
+{
+  lib,
+  pkgs,
+  ...
+}: let
   name = "dojo";
-  version = "0.7.3";
-  src = pkgs.fetchFromGitHub {
-    owner = "dojoengine";
-    repo = "dojo";
-    rev = "v${version}";
-    hash = "sha256-Fh/e1zcJRLK74LBbC6kqAG009ARrjDbCXWFUZ97TsMo=";
-  };
-
-  naersk' = pkgs.callPackage naersk { };
 
   rustPlatform = pkgs.makeRustPlatform {
-    cargo = pkgs.rust-bin.stable."1.76.0".minimal;
-    rustc = pkgs.rust-bin.stable."1.76.0".minimal;
+    cargo = pkgs.rust-bin.stable."1.80.0".minimal;
+    rustc = pkgs.rust-bin.stable."1.80.0".minimal;
   };
 
-  /*
-    lockFile = rustPlatform.importCargoLock {
-    lockFile = "${src}/Cargo.lock";
-    allowBuiltinFetchGit = true;
-
-    outputHashes = {
-      "account_sdk-0.1.0" = lib.fakeHash;
-      "alloy-0.2.0" = lib.fakeHash;
-      "alloy-consensus-0.2.0" = lib.fakeHash;
-      "alloy-contract-0.2.0" = lib.fakeHash;
-      "alloy-eips-0.2.0" = lib.fakeHash;
-      "alloy-genesis-0.2.0" = lib.fakeHash;
-      "alloy-json-abi-0.2.0" = lib.fakeHash;
-      "alloy-json-rpc-0.2.0" = lib.fakeHash;
-      "alloy-network-0.2.0" = lib.fakeHash;
-      "alloy-node-bindings-0.2.0" = lib.fakeHash;
-      "alloy-primitives-0.2.0" = lib.fakeHash;
-      "alloy-provider-0.2.0" = lib.fakeHash;
-      "alloy-rpc-client-0.2.0" = lib.fakeHash;
-      "alloy-rpc-types-anvil-0.2.0" = lib.fakeHash;
-      "alloy-rpc-types-eth-0.2.0" = lib.fakeHash;
-      "alloy-serde-0.2.0" = lib.fakeHash;
-      "alloy-signer-0.2.0" = lib.fakeHash;
-      "alloy-signer-local-0.2.0" = lib.fakeHash;
-      "alloy-transport-0.2.0" = lib.fakeHash;
-      "alloy-transport-http-0.2.0" = lib.fakeHash;
-      "blockifier-0.8.0-dev.2" = lib.fakeHash;
-      "cainome-0.2.3" = lib.fakeHash;
-      "cainome-cairo-serde-0.1.0" = lib.fakeHash;
-      "cainome-parser-0.1.0" = lib.fakeHash;
-      "cainome-rs-0.1.0" = lib.fakeHash;
-      "cainome-rs-macro-0.1.0" = lib.fakeHash;
-      "cairo-lang-macro-0.1.0" = lib.fakeHash;
-      "cairo-proof-parser-0.3.0" = lib.fakeHash;
-      "common-0.1.0" = lib.fakeHash;
-      "create-output-dir-1.0.0" = lib.fakeHash;
-      "hyper-reverse-proxy-0.5.2-dev" = lib.fakeHash;
-      "ipfs-api-backend-hyper-0.6.0" = lib.fakeHash;
-      "ipfs-api-prelude-0.6.0" = lib.fakeHash;
-      "libp2p-0.54.0" = lib.fakeHash;
-      "libp2p-allow-block-list-0.3.0" = lib.fakeHash;
+  mkDojo = {
+    version,
+    cairoVersion,
+    srcHash,
+    depsHash,
+    cairoHash,
+  }: let
+    cairo-zip = pkgs.fetchurl {
+      url = "https://github.com/starkware-libs/cairo/archive/refs/tags/v${cairoVersion}.zip";
+      hash = cairoHash;
     };
-  */
 
-in
-{
-  dojo-language-server = naersk'.buildPackage {
-    root = "${src}";
-    src = "${src}/bin/dojo-language-server";
+    src = pkgs.fetchFromGitHub {
+      name = "${name}-${version}-src";
+      owner = "dojoengine";
+      repo = "dojo";
+      rev = "v${version}";
+      hash = srcHash;
+    };
+
+    unpatchedCargoDeps = rustPlatform.fetchCargoVendor {
+      inherit src;
+      name = "${name}-${version}-deps";
+      hash = depsHash;
+    };
+
+    cargoDeps = let
+      patchMetadata = pkgs.substituteAll {
+        src = ../patches/scarb/scarb-metadata.patch;
+        cairoZip = "${cairo-zip}";
+      };
+      patchScarb = pkgs.substituteAll {
+        src = ../patches/scarb/scarb.patch;
+        cairoZip = "${cairo-zip}";
+      };
+    in
+      pkgs.stdenv.mkDerivation {
+        src = unpatchedCargoDeps;
+
+        name = "${name}-${version}-deps-patch";
+        phases = "unpackPhase patchPhase installPhase";
+
+        patchPhase = ''
+          BUILD_METADATA_DIR=$(echo ./*/scarb-build-metadata-*)
+          BUILD_SCARB_DIR=$(echo ./*/scarb-[0-9]*)
+
+          echo "Applying patch for scarb-build-metadata"
+          ${pkgs.patch}/bin/patch --directory $BUILD_METADATA_DIR -p1 < ${patchMetadata}
+          echo "Applying patch for scarb"
+          ${pkgs.patch}/bin/patch --directory $BUILD_SCARB_DIR -p1 < ${patchScarb}
+
+          # Similarly we can also run additional hooks to make changes
+          echo "=========="
+          # We need to find the version
+          SCARB_VERSION=$(echo $BUILD_SCARB_DIR | sed -En 's/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+          echo "SCARB: " $SCARB_VERSION
+          CAIRO_VERSION=$(${pkgs.toml-cli}/bin/toml get ./Cargo.lock '.' | ${pkgs.jq}/bin/jq '.package[] | select(.name == "cairo-lang-compiler").version' -r)
+          echo "CAIRO: " $CAIRO_VERSION
+
+          sed -i -e "s/{{cairo_version}}/$CAIRO_VERSION/g" $BUILD_METADATA_DIR/build.rs
+          sed -i -e "s/{{version}}/$SCARB_VERSION/g" $BUILD_METADATA_DIR/build.rs
+          echo "=========="
+        '';
+
+        installPhase = "cp -R ./ $out";
+      };
+    commonBuild = rustPlatform.buildRustPackage {
+      inherit src cargoDeps;
+
+      nativeBuildInputs = with pkgs; [
+        pkg-config
+
+        rustPlatform.bindgenHook
+
+        libclang
+
+        protobuf
+      ];
+
+      buildInputs = with pkgs; [
+        openssl
+      ];
+
+      # There's a failing test for now, and I want to get a build out.
+      doCheck = false;
+
+      # For scarb builds
+      CAIRO_ARCHIVE = "${cairo-zip}";
+
+      name = "dojo-${version}-build";
+    };
+
+    buildCrate = name:
+      pkgs.stdenv.mkDerivation {
+        # TODO: Copy just the wanted executable (let's reuse caching)
+        src = commonBuild;
+
+        name = name;
+        pname = name;
+
+        installPhase = ''
+          mkdir -p $out/bin
+          cp $src/bin/${name} $out/bin/${name}
+        '';
+      };
+  in {
+    dojo-language-server = buildCrate "dojo-language-server";
+    dojo-world-abigen = buildCrate "dojo-world-abigen";
+    katana = buildCrate "katana";
+    saya = buildCrate "saya";
+    sozo = buildCrate "sozo";
+    torii = buildCrate "torii";
   };
 
-  katana = naersk'.buildPackage {
-    root = "${src}";
-    src = "${src}/bin/katana";
-  };
+  versions = lib.importJSON ./dojoVersions.json;
 
-  sozo = naersk'.buildPackage {
-    root = "${src}";
-    src = "${src}/bin/sozo";
-  };
-
-  torii = naersk'.buildPackage {
-    root = "${src}";
-    src = "${src}/bin/torii";
-  };
+  toolchains = builtins.listToAttrs (builtins.map (v: {
+      name = v.version;
+      value = mkDojo v;
+    })
+    versions);
+in {
+  dojo = toolchains;
 }
