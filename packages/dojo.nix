@@ -117,6 +117,7 @@
         '';
       };
   in {
+    all = commonBuild;
     dojo-language-server = buildCrate "dojo-language-server";
     dojo-world-abigen = buildCrate "dojo-world-abigen";
     katana = buildCrate "katana";
@@ -133,6 +134,27 @@
     })
     versions);
 in {
+  flattened = builtins.listToAttrs (builtins.concatMap (
+      v:
+        builtins.map (name: let
+          versionName = builtins.replaceStrings ["."] ["_"] v.version;
+        in {
+          name =
+            if name == "all"
+            then "dojo_${versionName}"
+            else "${name}_${versionName}";
+          value = mkDojo v;
+        }) [
+          "all"
+          "dojo-language-server"
+          "dojo-world-abigen"
+          "katana"
+          "saya"
+          "sozo"
+          "torii"
+        ]
+    )
+    versions);
   dojo =
     toolchains
     // {

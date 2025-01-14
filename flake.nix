@@ -59,6 +59,8 @@
       inherit (pkgs) lib;
 
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
+
+      base = builtins.trace dojo-git.flattened dojo-git.flattened;
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -75,7 +77,7 @@
       };
 
       packages =
-        dojo-git.dojo."1.0.8"
+        base
         // {
           default = pkgs.cairo-bin.stable.scarb;
           inherit (pkgs.cairo-bin.stable) cairo scarb;
