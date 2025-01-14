@@ -1,0 +1,9 @@
+[
+  {
+    "version": "1.0.8",
+    "srcHash": "sha256-xHkekvEydY0Tuhy6aBLCas2SA+t2Z33+hQRdW0eqPAQ=",
+    "depsHash": "sha256-5JtCdeTodsLcx4sC1sQELIPSAdRXAWVLj+fk5xXNwVU=",
+    "cairoVersion": "2.8.4",
+    "cairoHash": "sha256-kSbvWAra38jZExCCbzz0LZvnk7nTDbmEHNgz3nXlU6g="
+  }
+]

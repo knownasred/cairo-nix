@@ -35,16 +35,31 @@
       };
     }
     // flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs {
+      patchedPkgs =
+        (import nixpkgs {
+          inherit system;
+        })
+        .applyPatches
+        {
+          name = "nixpkgs-unstable-patched";
+          src = nixpkgs;
+          patches = [
+            ./patches/nixpkgs.patch
+          ];
+        };
+
+      pkgs = import patchedPkgs {
         inherit system;
         overlays = [
           overlay
           oxalica.overlays.default
         ];
       };
+
       lib = pkgs.lib;
 
       dojo = import ./packages/dojo-download.nix {inherit pkgs lib naersk;};
+      dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -62,6 +77,8 @@
         scarb = pkgs.cairo-bin.stable.scarb;
         cairo-beta = pkgs.cairo-bin.beta.cairo;
         scarb-beta = pkgs.cairo-bin.beta.scarb;
+
+        sozo-git = dojo-git.dojo."1.0.8".sozo;
 
         starkli = import ./packages/starkli.nix {inherit pkgs lib;};
 
