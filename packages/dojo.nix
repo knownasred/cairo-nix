@@ -111,13 +111,15 @@
         pname = name;
 
         installPhase = ''
-          mkdir $out/bin
+          mkdir -p $out/bin
           cp $src/bin/${name} $out/bin/${name}
         '';
       };
   in {
     dojo-language-server = buildCrate "dojo-language-server";
+    dojo-world-abigen = buildCrate "dojo-world-abigen";
     katana = buildCrate "katana";
+    saya = buildCrate "saya";
     sozo = buildCrate "sozo";
     torii = buildCrate "torii";
   };
