@@ -1,4 +1,4 @@
-name: "Cachix Upload"
+name: "Upload to caches"
 on:
   pull_request:
   push:
@@ -20,6 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v25
+
+      - name: "Setup Attic cache"
+        uses: ryanccn/attic-action@v0
+        if: ${{ inputs.binary-cache == true }}
+        with:
+          endpoint: ${{ secrets.ATTIC_ENDPOINT }}
+          cache: ${{ secrets.ATTIC_CACHE }}
+          token: ${{ secrets.ATTIC_TOKEN }}
+
       - uses: cachix/cachix-action@v14
         with:
           name: dojo-nix
@@ -43,3 +52,9 @@ jobs:
           nix run github:juspay/cachix-push -- \
             --cache dojo-nix \
             < $HOME/omci.json
+      - name: Push to attic
+        if: env.BRANCH_NAME == 'main'
+        run: |
+          cat $HOME/results.json \
+           | nix run nixpkgs#jq -- '.result.ROOT.build.outPaths.[]' -r \
+           | nix run github:zhaofengli/attic -- push cairo-nix --stdin
