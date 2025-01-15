@@ -51,7 +51,7 @@ jobs:
 
       - name: Omnix CI
         run: |
-          nix run github:juspay/omnix -- ci \
+          nix run github:juspay/omnix -- ci . \
             --extra-access-tokens ${{ secrets.GITHUB_TOKEN }} \
             run \
               --systems "${{ steps.determine-architecture.outputs.arch }}" \
