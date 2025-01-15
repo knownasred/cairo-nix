@@ -51,9 +51,9 @@ jobs:
 
       - name: Omnix CI
         run: |
-          nix run github:juspay/omnix -- ci . \
+          nix run github:juspay/omnix -- ci \
             --extra-access-tokens ${{ secrets.GITHUB_TOKEN }} \
-            run \
+            run . \
               --systems "${{ steps.determine-architecture.outputs.arch }}" \
               --results=$HOME/omci.json
       # Push the Nix cache
