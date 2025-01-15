@@ -41,6 +41,8 @@ jobs:
           # If you chose API tokens for write access OR if you have a private cache
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: true
+          # Use flakes instead of the profile
+          installCommand: nix profile install --accept-flake-config nixpkgs#cachix
 
       - name: "Determine package architecture"
         id: determine-architecture
