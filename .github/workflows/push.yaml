@@ -26,11 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: "Install Nix"
-        uses: DeterminateSystems/nix-installer-action@main
-        with:
-          extra-conf: |
-            ${{ env.EXTRA_NIX_CONFIG }}
+      - uses: cachix/install-nix-action@v25
 
       - name: "Setup Attic cache"
         uses: ryanccn/attic-action@v0
