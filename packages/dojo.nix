@@ -134,27 +134,16 @@
     })
     versions);
 in {
-  flattened = builtins.listToAttrs (builtins.concatMap (
-      v:
-        builtins.map (name: let
-          versionName = builtins.replaceStrings ["."] ["_"] v.version;
-        in {
-          name =
-            if name == "all"
-            then "dojo_${versionName}"
-            else "${name}_${versionName}";
-          value = toolchains.${v.version}.${name};
-        }) [
-          "all"
-          "dojo-language-server"
-          "dojo-world-abigen"
-          "katana"
-          "saya"
-          "sozo"
-          "torii"
-        ]
+  flattened = builtins.listToAttrs (builtins.map (
+      v: let
+        versionName = builtins.replaceStrings ["."] ["_"] v.version;
+      in {
+        name = "dojo_${versionName}";
+        value = toolchains.${v.version}.all;
+      }
     )
     versions);
+
   dojo =
     toolchains
     // {
