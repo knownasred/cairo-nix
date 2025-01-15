@@ -25,7 +25,6 @@ jobs:
 
       - name: "Setup Attic cache"
         uses: ryanccn/attic-action@v0
-        if: ${{ inputs.binary-cache == true }}
         with:
           endpoint: ${{ secrets.ATTIC_ENDPOINT }}
           cache: ${{ secrets.ATTIC_CACHE }}
