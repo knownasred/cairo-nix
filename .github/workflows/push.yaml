@@ -37,12 +37,18 @@ jobs:
           # If you chose API tokens for write access OR if you have a private cache
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
           skipPush: true
+
+      - name: "Determine package architecture"
+        id: determine-architecture
+        run: |
+          printf 'arch=%s\n' "$(echo '${{ matrix.package }}' | cut -d. -f1)" | tee -a $GITHUB_OUTPUT
+
       - name: Omnix CI
         run: |
           nix run github:juspay/omnix -- ci \
             --extra-access-tokens ${{ secrets.GITHUB_TOKEN }} \
             run \
-              --systems "${{ matrix.system }}" \
+              --systems "${{ steps.determine-architecture.outputs.arch }}" \
               --results=$HOME/omci.json
       # Push the Nix cache
       - name: Push to cachix
