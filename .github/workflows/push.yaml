@@ -6,7 +6,9 @@ jobs:
   cachix-build:
     strategy:
       matrix:
-        system: [x86_64-linux, aarch64-linux, aarch64-darwin, x86_64-darwin]
+        system:
+          - ubuntu-latest
+          - macos-latest
         isMain:
           - ${{ contains(github.ref, 'main') }}
         # Excluded emulated builds on PRs
