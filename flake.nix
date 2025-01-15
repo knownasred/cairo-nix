@@ -23,6 +23,10 @@
     };
   in
     {
+      # Add our custom cache as recommended (it takes 25 minutes to build dojo)
+      nixConfig.extra-substituters = "https://cache.valentin.red/cairo-nix";
+      nixConfig.extra-trusted-public-keys = "cairo-nix:v8i37tyBwVBi/YKjomvylfaAUyk3GwvLhMaETHhxSCM=";
+
       overlays = {
         default = overlay;
       };
