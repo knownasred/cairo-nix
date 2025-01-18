@@ -19,5 +19,12 @@
     "depsHash": "sha256-O4yDWuczTyeX3tS7O0YQALALbSbhOm5YpgXhkNCIH/U=",
     "cairoVersion": "2.8.4",
     "cairoHash": "sha256-kSbvWAra38jZExCCbzz0LZvnk7nTDbmEHNgz3nXlU6g="
+  },
+  {
+    "version": "1.0.12",
+    "srcHash": "sha256-p3WZGyCZPjo2DGJY3E8TTrlm4SA/iY3h1z/n/uQVbCo=",
+    "depsHash": "sha256-fINb4YyiUF+VW8m98ScRZi3pkAsmzcw2YJhYzPvUv9g=",
+    "cairoVersion": "2.8.4",
+    "cairoHash": "sha256-kSbvWAra38jZExCCbzz0LZvnk7nTDbmEHNgz3nXlU6g="
   }
 ]
