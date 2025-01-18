@@ -11,12 +11,7 @@ jobs:
           - macos-latest
         isMain:
           - ${{ contains(github.ref, 'main') }}
-        # Excluded emulated builds on PRs
-        exclude:
-          - system: aarch64-linux
-            isMain: false
-          - system: x86_64-darwin
-            isMain: false
+          
       fail-fast: false
     runs-on: ${{ matrix.system }}
     env:
@@ -47,7 +42,7 @@ jobs:
       - name: "Determine package architecture"
         id: determine-architecture
         run: |
-          printf 'arch=%s\n' "$(echo '${{ matrix.package }}' | cut -d. -f1)" | tee -a $GITHUB_OUTPUT
+          echo "arch=$(nix eval --impure --raw --expr 'builtins.currentSystem')" > $GITHUB_OUTPUT
 
       - name: Omnix CI
         run: |
