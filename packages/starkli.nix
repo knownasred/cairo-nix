@@ -3,12 +3,12 @@
   pkgs,
   ...
 }: let
-  version = "0.3.6";
+  version = "0.3.7";
   src = pkgs.fetchFromGitHub {
     owner = "xJonathanLEI";
     repo = "starkli";
     rev = "v${version}";
-    hash = "sha256-T6rvA0siF0FEi7A8H3P9l0ISsQwjRpUw7FYyFu72SMs=";
+    hash = "sha256-q1H/B0WRM9/ZHODbEDuBu9RhscrBMKqAgIbFDwrX9cM=";
   };
 
   rustPlatform = pkgs.makeRustPlatform {
@@ -30,7 +30,7 @@ in
     PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig";
 
     useFetchCargoVendor = true;
-    cargoHash = "sha256-jGsn0dqJncLvs0kL4YptM1MOJUWkSz697/3QmcvPGC4=";
+    cargoHash = "sha256-6pB/bklkWlTcGRUm1fb1Qi0gOtGS34kKj/ec0T/+VS0=";
 
     # Workaround for https://github.com/NixOS/nixpkgs/pull/300532
     cargoDepsHook = ''
