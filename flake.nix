@@ -76,6 +76,7 @@
 
       legacyPackages = {
         inherit (dojo-git) dojo;
+        cairo = pkgs.cairo-bin;
       };
 
       packages =
@@ -87,8 +88,7 @@
           cairo-beta = pkgs.cairo-bin.beta.cairo;
           scarb-beta = pkgs.cairo-bin.beta.scarb;
 
-          sozo-git = dojo-git.dojo."1.0.8".sozo;
-
+          slot = import ./packages/slot-download.nix {inherit pkgs lib;};
           starkli = import ./packages/starkli.nix {inherit pkgs lib;};
         };
     });
