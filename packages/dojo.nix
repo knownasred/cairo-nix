@@ -6,8 +6,8 @@
   name = "dojo";
 
   rustPlatform = pkgs.makeRustPlatform {
-    cargo = pkgs.rust-bin.stable."1.80.0".minimal;
-    rustc = pkgs.rust-bin.stable."1.80.0".minimal;
+    cargo = pkgs.rust-bin.stable."1.81.0".minimal;
+    rustc = pkgs.rust-bin.stable."1.81.0".minimal;
   };
 
   mkDojo = {
