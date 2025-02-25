@@ -5,18 +5,19 @@
 }: let
   name = "dojo";
 
-  rustPlatform = pkgs.makeRustPlatform {
-    cargo = pkgs.rust-bin.stable."1.81.0".minimal;
-    rustc = pkgs.rust-bin.stable."1.81.0".minimal;
-  };
-
   mkDojo = {
     version,
+    rustVersion,
     cairoVersion,
     srcHash,
     depsHash,
     cairoHash,
   }: let
+    rustPlatform = pkgs.makeRustPlatform {
+      cargo = pkgs.rust-bin.stable.${rustVersion}.minimal;
+      rustc = pkgs.rust-bin.stable.${rustVersion}.minimal;
+    };
+
     cairo-zip = pkgs.fetchurl {
       url = "https://github.com/starkware-libs/cairo/archive/refs/tags/v${cairoVersion}.zip";
       hash = cairoHash;

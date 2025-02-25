@@ -1,6 +1,7 @@
 [
   {
     "version": "1.0.8",
+    "rustVersion": "1.80.0",
     "srcHash": "sha256-xHkekvEydY0Tuhy6aBLCas2SA+t2Z33+hQRdW0eqPAQ=",
     "depsHash": "sha256-5JtCdeTodsLcx4sC1sQELIPSAdRXAWVLj+fk5xXNwVU=",
     "cairoVersion": "2.8.4",
@@ -8,6 +9,7 @@
   },
   {
     "version": "1.0.10",
+    "rustVersion": "1.80.0",
     "srcHash": "sha256-p5flIDUloDDpp8mtuQVclBuWoXPFMCTs+oL0MWSHYQM=",
     "depsHash": "sha256-vwEZ7VMLz/77/9n2+QDo+PO0teKNF1AQ3Wu91PQO51s=",
     "cairoVersion": "2.8.4",
@@ -15,6 +17,7 @@
   },
   {
     "version": "1.0.11",
+    "rustVersion": "1.80.0",
     "srcHash": "sha256-odvARNhaM4RNEPagcXRiMRHOo9lN+WlFNk7HkkvnZgc=",
     "depsHash": "sha256-O4yDWuczTyeX3tS7O0YQALALbSbhOm5YpgXhkNCIH/U=",
     "cairoVersion": "2.8.4",
@@ -22,6 +25,7 @@
   },
   {
     "version": "1.0.12",
+    "rustVersion": "1.80.0",
     "srcHash": "sha256-p3WZGyCZPjo2DGJY3E8TTrlm4SA/iY3h1z/n/uQVbCo=",
     "depsHash": "sha256-fINb4YyiUF+VW8m98ScRZi3pkAsmzcw2YJhYzPvUv9g=",
     "cairoVersion": "2.8.4",
@@ -29,6 +33,7 @@
   },
   {
     "version": "1.1.2",
+    "rustVersion": "1.81.0",
     "srcHash": "sha256-nzaCzN01GjiawUzOaRsNwIUSEcEuOs1nbzl/aK3ordg=",
     "depsHash": "sha256-788cD9laDVTAtdILWZaN7LYBR1tx4pmffaNmYnJ/CzA=",
     "cairoVersion": "2.9.2",
