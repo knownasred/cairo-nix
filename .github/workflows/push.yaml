@@ -11,7 +11,7 @@ jobs:
           - macos-latest
         isMain:
           - ${{ contains(github.ref, 'main') }}
-          
+
       fail-fast: false
     runs-on: ${{ matrix.system }}
     env:
@@ -46,11 +46,12 @@ jobs:
 
       - name: Omnix CI
         run: |
-          nix run github:juspay/omnix -- ci \
+          nix --accept-flake-config run github:juspay/omnix -- ci run \
             --extra-access-tokens ${{ secrets.GITHUB_TOKEN }} \
-            run \
-              --systems "${{ steps.determine-architecture.outputs.arch }}" \
-              --results=$HOME/omci.json
+            --systems "${{ matrix.system }}" \
+            --results=$HOME/omci.json \
+            -- --accept-flake-config
+
       # Push the Nix cache
       - name: Push to cachix
         env:
