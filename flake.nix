@@ -7,6 +7,15 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    crane.url = "github:ipetkov/crane";
+
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.rust-analyzer-src.follows = "";
+    };
+
     naersk.url = "github:nix-community/naersk";
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -15,7 +24,8 @@
     nixpkgs,
     flake-utils,
     oxalica,
-    naersk,
+    crane,
+    fenix,
     ...
   }: let
     overlay = import ./overlay.nix {
@@ -63,6 +73,7 @@
       inherit (pkgs) lib;
 
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
+      dojo-crane = import ./packages/dojo-crane.nix {inherit pkgs lib crane fenix;};
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -87,6 +98,16 @@
 
           cairo-beta = pkgs.cairo-bin.beta.cairo;
           scarb-beta = pkgs.cairo-bin.beta.scarb;
+
+          dojo-test = dojo-crane {
+            "version" = "1.2.1";
+            "rustVersion" = "1.81.0";
+            "srcHash" = "sha256-AgKK8fKWN1yepb2SMiAT/d2F8/jygl2UTau2iLraBBU=";
+            "depsHash" = "sha256-CeiQm1XVoDJLe7UIYhvoQ5ieQWy0pwkKub78FK5Z/7E=";
+            "cairoVersion" = "2.9.2";
+            "cairoHash" = "sha256-mxTklhzHeZmF4AYS9IHySoaBwitqjjUnybfjyt/gEuI=";
+            "patches" = true;
+          };
 
           slot = import ./packages/slot-download.nix {inherit pkgs lib;};
           starkli = import ./packages/starkli.nix {inherit pkgs lib;};

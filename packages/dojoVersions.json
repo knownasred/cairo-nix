@@ -45,6 +45,7 @@
     "srcHash": "sha256-AgKK8fKWN1yepb2SMiAT/d2F8/jygl2UTau2iLraBBU=",
     "depsHash": "sha256-CeiQm1XVoDJLe7UIYhvoQ5ieQWy0pwkKub78FK5Z/7E=",
     "cairoVersion": "2.9.2",
-    "cairoHash": "sha256-mxTklhzHeZmF4AYS9IHySoaBwitqjjUnybfjyt/gEuI="
+    "cairoHash": "sha256-mxTklhzHeZmF4AYS9IHySoaBwitqjjUnybfjyt/gEuI=",
+    "patches": true
   }
 ]

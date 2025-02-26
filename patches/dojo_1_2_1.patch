@@ -1,0 +1,261 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 724fbc46..e76459b7 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -1978,7 +1978,7 @@ dependencies = [
+  "bitflags 2.6.0",
+  "cexpr",
+  "clang-sys",
+- "itertools 0.12.1",
++ "itertools 0.10.5",
+  "lazy_static",
+  "lazycell",
+  "log",
+@@ -4537,28 +4537,6 @@ version = "1.2.1"
+ name = "dojo-examples-spawn-and-move"
+ version = "1.2.1"
+
+-[[package]]
+-name = "dojo-lang"
+-version = "1.1.2"
+-source = "git+https://github.com/dojoengine/dojo?rev=86bb5ae#86bb5aea7c2210d31ba16ecdfd45146aa665cd5e"
+-dependencies = [
+- "anyhow",
+- "cairo-lang-defs",
+- "cairo-lang-diagnostics",
+- "cairo-lang-filesystem",
+- "cairo-lang-plugins",
+- "cairo-lang-semantic",
+- "cairo-lang-syntax",
+- "cairo-lang-utils",
+- "dojo-types 1.1.2",
+- "itertools 0.12.1",
+- "serde",
+- "smol_str",
+- "starknet",
+- "starknet-crypto 0.7.2",
+- "tracing",
+-]
+-
+ [[package]]
+ name = "dojo-lang"
+ version = "1.2.1"
+@@ -4571,7 +4549,7 @@ dependencies = [
+  "cairo-lang-semantic",
+  "cairo-lang-syntax",
+  "cairo-lang-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "itertools 0.12.1",
+  "serde",
+  "smol_str",
+@@ -4586,7 +4564,7 @@ version = "1.2.1"
+ dependencies = [
+  "cairo-lang-language-server",
+  "clap",
+- "dojo-lang 1.2.1",
++ "dojo-lang",
+ ]
+
+ [[package]]
+@@ -4629,28 +4607,6 @@ dependencies = [
+  "url",
+ ]
+
+-[[package]]
+-name = "dojo-types"
+-version = "1.1.2"
+-source = "git+https://github.com/dojoengine/dojo?rev=86bb5ae#86bb5aea7c2210d31ba16ecdfd45146aa665cd5e"
+-dependencies = [
+- "anyhow",
+- "cainome 0.4.11",
+- "crypto-bigint",
+- "hex",
+- "indexmap 2.5.0",
+- "itertools 0.12.1",
+- "num-traits 0.2.19",
+- "regex",
+- "serde",
+- "serde_json",
+- "starknet",
+- "starknet-crypto 0.7.2",
+- "strum 0.25.0",
+- "strum_macros 0.25.3",
+- "thiserror 1.0.63",
+-]
+-
+ [[package]]
+ name = "dojo-types"
+ version = "1.2.1"
+@@ -4698,7 +4654,7 @@ dependencies = [
+  "async-trait",
+  "cainome 0.4.11",
+  "cairo-lang-starknet-classes",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "futures",
+  "hex",
+  "hex-literal",
+@@ -6937,7 +6893,7 @@ dependencies = [
+  "httpdate",
+  "itoa",
+  "pin-project-lite",
+- "socket2 0.5.7",
++ "socket2 0.4.10",
+  "tokio",
+  "tower-service",
+  "tracing",
+@@ -7126,7 +7082,7 @@ dependencies = [
+  "iana-time-zone-haiku",
+  "js-sys",
+  "wasm-bindgen",
+- "windows-core 0.52.0",
++ "windows-core 0.51.1",
+ ]
+
+ [[package]]
+@@ -11169,7 +11125,7 @@ checksum = "22505a5c94da8e3b7c2996394d1c933236c4d743e81a410bcca4e6989fc066a4"
+ dependencies = [
+  "bytes",
+  "heck 0.5.0",
+- "itertools 0.12.1",
++ "itertools 0.10.5",
+  "log",
+  "multimap",
+  "once_cell",
+@@ -11210,7 +11166,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
+ dependencies = [
+  "anyhow",
+- "itertools 0.12.1",
++ "itertools 0.10.5",
+  "proc-macro2",
+  "quote",
+  "syn 2.0.90",
+@@ -12464,7 +12420,7 @@ dependencies = [
+  "derive_builder",
+  "dialoguer",
+  "directories",
+- "dojo-lang 1.1.2",
++ "dojo-lang",
+  "dunce",
+  "flate2",
+  "fs4",
+@@ -13302,7 +13258,7 @@ dependencies = [
+  "colored",
+  "dojo-bindgen",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "katana-rpc-api",
+@@ -13343,7 +13299,7 @@ dependencies = [
+  "colored",
+  "colored_json",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "futures",
+@@ -14875,7 +14831,7 @@ dependencies = [
+  "async-trait",
+  "camino",
+  "crypto-bigint",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-world",
+  "futures",
+  "futures-util",
+@@ -14909,7 +14865,7 @@ dependencies = [
+  "chrono",
+  "convert_case 0.6.0",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "katana-runner",
+@@ -14945,7 +14901,7 @@ dependencies = [
+  "camino",
+  "crypto-bigint",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "futures",
+@@ -14998,7 +14954,7 @@ dependencies = [
+  "crypto-bigint",
+  "data-url",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "futures-channel",
+@@ -15032,7 +14988,7 @@ version = "1.2.1"
+ dependencies = [
+  "anyhow",
+  "chrono",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-world",
+  "futures",
+  "indexmap 2.5.0",
+@@ -15072,7 +15028,7 @@ dependencies = [
+  "chrono",
+  "ctrlc",
+  "dojo-metrics",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "either",
+@@ -15155,7 +15111,7 @@ dependencies = [
+  "crypto-bigint",
+  "data-url",
+  "dojo-test-utils",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "dojo-utils",
+  "dojo-world",
+  "futures-channel",
+@@ -15187,7 +15143,7 @@ version = "1.2.1"
+ dependencies = [
+  "cainome 0.4.11",
+  "crypto-bigint",
+- "dojo-types 1.2.1",
++ "dojo-types",
+  "indexmap 2.5.0",
+  "serde",
+  "serde_json",
+@@ -16496,15 +16452,6 @@ dependencies = [
+  "windows-targets 0.48.5",
+ ]
+
+-[[package]]
+-name = "windows-core"
+-version = "0.52.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "33ab640c8d7e35bf8ba19b884ba838ceb4fba93a4e8c65a9059d08afcfc683d9"
+-dependencies = [
+- "windows-targets 0.52.6",
+-]
+-
+ [[package]]
+ name = "windows-core"
+ version = "0.57.0"
+diff --git a/Cargo.toml b/Cargo.toml
+index f708f55a..ac1484eb 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -287,3 +287,7 @@ bitvec = "1.0.1"
+ proc-macro2 = "1.0"
+ quote = "1.0"
+ syn = { version = "2.0", default-features = false }
++
++[patch.'https://github.com/dojoengine/dojo']
++# Replace the dojo-lang dependency with the current build one.
++dojo-lang = { path = './crates/dojo/lang' }

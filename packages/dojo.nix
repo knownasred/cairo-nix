@@ -12,6 +12,7 @@
     srcHash,
     depsHash,
     cairoHash,
+    patches ? false,
   }: let
     rustPlatform = pkgs.makeRustPlatform {
       cargo = pkgs.rust-bin.stable.${rustVersion}.minimal;
@@ -23,7 +24,7 @@
       hash = cairoHash;
     };
 
-    src = pkgs.fetchFromGitHub {
+    unpatchedSrc = pkgs.fetchFromGitHub {
       name = "${name}-${version}-src";
       owner = "dojoengine";
       repo = "dojo";
@@ -31,9 +32,29 @@
       hash = srcHash;
     };
 
+    dojoPatch = pkgs.substituteAll {
+      src = ../patches/dojo_1_2_1.patch;
+    };
+
+    src = pkgs.stdenv.mkDerivation {
+      src = unpatchedSrc;
+      name = "${name}-${version}-src-patched";
+
+      installPhase = "cp -R ./ $out";
+
+      patches =
+        if patches
+        then [
+          dojoPatch
+        ]
+        else [];
+    };
+
     unpatchedCargoDeps = rustPlatform.fetchCargoVendor {
       inherit src;
       name = "${name}-${version}-deps";
+      pname = "${name}-${version}-deps";
+
       hash = depsHash;
     };
 
