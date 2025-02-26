@@ -1,7 +1,7 @@
 diff --git a/./cairo_compile.rs b/./cairo_compile.rs
 index 14c26b0..4c9f535 100644
---- a/./cairo_compile.rs
-+++ b/./cairo_compile.rs
+--- a/./src/test_utils/cairo_compile.rs
++++ b/./src/test_utils/cairo_compile.rs
 @@ -68,7 +68,7 @@ pub enum CompilationArtifacts {
  /// Returns the version of the Cairo1 compiler defined in the root Cargo.toml (by checking the
  /// package version of one of the crates from the compiler in the dependencies).
