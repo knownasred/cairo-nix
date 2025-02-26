@@ -48,6 +48,7 @@
   commonArgs = {
     inherit src;
     strictDeps = true;
+    pname = "dojo";
 
     buildInputs = with pkgs;
       [
@@ -79,7 +80,7 @@
   # Override for scarb-metadata (pin versions for now)
   isScarb = p:
     lib.hasPrefix
-    "git+https://github.com/software-mansion/scarb"
+    "git+https://github.com/dojoengine/scarb"
     p.source;
 
   # Prepare the patched vendor directory
