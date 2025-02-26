@@ -48,7 +48,7 @@ jobs:
         run: |
           nix --accept-flake-config run github:juspay/omnix -- ci run \
             --extra-access-tokens ${{ secrets.GITHUB_TOKEN }} \
-            --systems "${{ matrix.system }}" \
+            --systems "${{ steps.determine-architecture.outputs.arch }}" \
             --results=$HOME/omci.json \
             -- --accept-flake-config
 
