@@ -38,5 +38,13 @@
     "depsHash": "sha256-788cD9laDVTAtdILWZaN7LYBR1tx4pmffaNmYnJ/CzA=",
     "cairoVersion": "2.9.2",
     "cairoHash": "sha256-mxTklhzHeZmF4AYS9IHySoaBwitqjjUnybfjyt/gEuI="
+  },
+  {
+    "version": "1.2.1",
+    "rustVersion": "1.81.0",
+    "srcHash": "",
+    "depsHash": "",
+    "cairoVersion": "2.9.2",
+    "cairoHash": "sha256-mxTklhzHeZmF4AYS9IHySoaBwitqjjUnybfjyt/gEuI="
   }
 ]
