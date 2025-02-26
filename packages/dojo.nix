@@ -46,6 +46,9 @@
         src = ../patches/scarb/scarb.patch;
         cairoZip = "${cairo-zip}";
       };
+      patchBlockifier = pkgs.substituteAll {
+        src = ../patches/blockifier/blockifier.patch;
+      };
     in
       pkgs.stdenv.mkDerivation {
         src = unpatchedCargoDeps;
@@ -56,11 +59,14 @@
         patchPhase = ''
           BUILD_METADATA_DIR=$(echo ./*/scarb-build-metadata-*)
           BUILD_SCARB_DIR=$(echo ./*/scarb-[0-9]*)
+          BUILD_BLOCKIFIER_DIR=$(echo ./*/blockifier-[0-9]*)
 
           echo "Applying patch for scarb-build-metadata"
           ${pkgs.patch}/bin/patch --directory $BUILD_METADATA_DIR -p1 < ${patchMetadata}
           echo "Applying patch for scarb"
           ${pkgs.patch}/bin/patch --directory $BUILD_SCARB_DIR -p1 < ${patchScarb}
+          echo "Applying patch for blockifier"
+          ${pkgs.patch}/bin/patch --directory $BUILD_BLOCKIFIER_DIR -p1 < ${patchBlockifier}
 
           # Similarly we can also run additional hooks to make changes
           echo "=========="
