@@ -98,16 +98,16 @@
               pss = lib.findFirst (p: (p.name == "scarb-build-metadata")) null ps;
               scarb = lib.findFirst (p: (p.name == "scarb")) null ps;
             in {
-              patches = [
+              patches = builtins.trace "Reached patch!" [
                 (pkgs.substituteAll {
-                  src = ./.nix-hack/scarb-metadata.patch;
+                  src = ./overrides/scarb.patch;
                   cairoZip = "${cairo-zip}";
                 })
               ];
 
               # Similarly we can also run additional hooks to make changes
-              postInstall = builtins.trace pss ''
-                echo "=========="
+              postInstall = ''
+                echo "==========="
                 echo "-> " $CAIRO_ARCHIVE
                 SCARB_META_OUT_DIR=${pss.name}-${pss.version}
                 cp $src/Cargo.lock $out/$SCARB_META_OUT_DIR/Cargo.lock
@@ -115,8 +115,7 @@
                 CAIRO_VERSION=$(${pkgs.toml-cli}/bin/toml get Cargo.lock . | jq '.package[] | select(.name == "cairo-lang-compiler").version' -r)
                 sed -i -e "s/{{cairo_version}}/$CAIRO_VERSION/g" $out/$SCARB_META_OUT_DIR/build.rs
                 sed -i -e "s/{{version}}/${scarb.version}/g" $out/$SCARB_META_OUT_DIR/build.rs
-                echo "=========="
-                cat $out/$SCARB_META_OUT_DIR/build.rs
+                echo "==========="
               '';
             }
           )
@@ -125,15 +124,15 @@
           drv;
     });
 
-  cargoArtifacts =
-    craneLib.buildDepsOnly commonArgs
+  cargoArtifacts = craneLib.buildDepsOnly (commonArgs
     // {
       pname = "dojo-deps";
-      cargoVendorDir = builtins.toString cargoVendorDir;
-    };
+      inherit cargoVendorDir;
+    });
 in
   craneLib.buildPackage {
     inherit cargoArtifacts src;
+    inherit cargoVendorDir;
     inherit (craneLib.crateNameFromCargoToml {inherit src;}) version;
     pname = "dojo-stack";
     doCheck = false;

@@ -1,7 +1,20 @@
-diff --git a/build.rs b/build.rs
+diff --git a/scarb/build.rs b/scarb/build.rs
+index bfab290..845fa1e 100644
+--- a/scarb/build.rs
++++ b/scarb/build.rs
+@@ -61,7 +61,7 @@ fn obtain_core(rev: &str) {
+
+ fn download_remote(cairo_zip: &Path, rev: &str) {
+     let url: String = format!("https://github.com/starkware-libs/cairo/archive/{rev}.zip");
+-    let mut curl = Command::new("curl");
++    let mut curl = Command::new("@curl@");
+     curl.args(["--proto", "=https", "--tlsv1.2", "-fL"]);
+     curl.arg("-o");
+     curl.arg(cairo_zip);
+diff --git a/utils/scarb-build-metadata/build.rs b/utils/scarb-build-metadata/build.rs
 index e6c1e42..8ae3080 100644
---- a/build.rs
-+++ b/build.rs
+--- a/utils/scarb-build-metadata/build.rs
++++ b/utils/scarb-build-metadata/build.rs
 @@ -35,105 +35,6 @@ fn commit_info() {
  }
 
