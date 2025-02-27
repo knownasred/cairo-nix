@@ -258,4 +258,4 @@ index f708f55a..ac1484eb 100644
 +
 +[patch.'https://github.com/dojoengine/dojo']
 +# Replace the dojo-lang dependency with the current build one.
-+dojo-lang = { path = './crates/dojo/lang' }
++dojo-lang = { path = 'crates/dojo/lang' }
