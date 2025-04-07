@@ -413,6 +413,22 @@
         cargoLock = null;
       };
     }
+
+    {
+      toolchainVersion = "2.9.4";
+      cairo = {
+        version = "2.9.4";
+        srcHash = "";
+        archiveHash = "sha256-y+O/qCafobSaTMNFST7BK4jAep7TPS/Y/4SL6K7hzJE=";
+        cargoHash = "";
+      };
+      scarb = {
+        version = "2.9.4";
+        srcHash = "sha256-mCpPWSuVtUws7Fd5XnVj+THU0fX5XrMe2UM/r1+Of6k=";
+        cargoHash = "sha256-3CZpx0QK05vA0x2URnPnase3VNt2FcoPCs+P1ol4Igw=";
+        cargoLock = null;
+      };
+    }
   ];
 
   toolchains = builtins.listToAttrs (builtins.map (v: {
@@ -425,7 +441,7 @@ in {
   cairo-bin =
     toolchains
     // {
-      stable = toolchains."2.8.4-1";
-      beta = toolchains."2.8.4-1";
+      stable = toolchains."2.9.4";
+      beta = toolchains."2.9.4";
     };
 }

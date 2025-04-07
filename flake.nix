@@ -63,6 +63,7 @@
       inherit (pkgs) lib;
 
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
+      dojo-download = import ./packages/dojo-download.nix {inherit pkgs lib;};
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -84,6 +85,8 @@
         // {
           default = pkgs.cairo-bin.stable.scarb;
           inherit (pkgs.cairo-bin.stable) cairo scarb;
+
+          dojo = dojo-download.dojo;
 
           cairo-beta = pkgs.cairo-bin.beta.cairo;
           scarb-beta = pkgs.cairo-bin.beta.scarb;

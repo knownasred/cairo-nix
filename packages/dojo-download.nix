@@ -1,31 +1,63 @@
 # While I'm trying to fix the build, I'm using the prebuilt artifacts instead.
 # I'll remove this once I've fixed the build.
-{ lib
-, pkgs
-, ...
-}:
-let
-  version = "0.7.3";
+{
+  lib,
+  pkgs,
+  ...
+}: let
+  version = "1.4.0";
   buildTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/dojo/releases/download/v${version}/dojo_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:1xwkrr9sc9aahhnkw10s2g3889374550mpzlhyv4pixiy98sihcr";
+    sha256 = "sha256:02s1kkpx7g85gp8l43jayyp1qj5nd0xjjyj4q99rwhmprc9y0wrm";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
     name = "dojo-artifacts";
     src = buildTargz;
-    phases = [ "unpackPhase" ];
+    phases = ["unpackPhase"];
     unpackPhase = ''
       mkdir -p $out
       tar -xzf $src -C $out
     '';
   };
-in
-{
+
+  libraries = with pkgs;
+    lib.makeLibraryPath [
+      glibc
+      zlib
+    ];
+in {
+  dojo = pkgs.stdenv.mkDerivation {
+    name = "dojo";
+    src = artifacts;
+    phases = ["unpackPhase" "installPhase"];
+
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+    buildInputs = with pkgs; [
+      stdenv.cc.cc
+      glibc
+      zlib
+    ];
+
+    autoPatchelfIgnoreMissingDeps = "false";
+    dontAutoPatchelf = "true";
+
+    installPhase = ''
+      runHook preInstall
+
+      for file in ./*; do
+        install -m755 -D "$file" "$out/bin/$file"
+        autoPatchelf $out/bin/$file
+      done
+
+      runHook postInstall
+    '';
+  };
+
   dojo-language-server = pkgs.stdenv.mkDerivation {
     name = "dojo-language-server";
     src = artifacts;
-    phases = [ "unpackPhase" "installPhase" ];
+    phases = ["unpackPhase" "installPhase"];
     installPhase = ''
       mkdir -p $out/bin
       cp dojo-language-server $out/bin
@@ -36,8 +68,8 @@ in
     name = "katana";
     src = artifacts;
 
-    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
-    buildInputs = with pkgs; [ stdenv.cc.cc ];
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+    buildInputs = with pkgs; [stdenv.cc.cc];
 
     installPhase = ''
       runHook preInstall
@@ -47,8 +79,8 @@ in
 
       wrapProgram $out/bin/${name} \
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
-          pkgs.glibc
-       ]}"
+        pkgs.glibc
+      ]}"
 
       runHook postInstall
     '';
@@ -58,8 +90,8 @@ in
     name = "sozo";
     src = artifacts;
 
-    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
-    buildInputs = with pkgs; [ stdenv.cc.cc ];
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+    buildInputs = with pkgs; [stdenv.cc.cc];
 
     installPhase = ''
       runHook preInstall
@@ -69,8 +101,8 @@ in
 
       wrapProgram $out/bin/${name} \
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
-          pkgs.glibc
-       ]}"
+        pkgs.glibc
+      ]}"
 
       runHook postInstall
     '';
@@ -80,8 +112,8 @@ in
     name = "torii";
     src = artifacts;
 
-    nativeBuildInputs = with pkgs; [ autoPatchelfHook makeWrapper ];
-    buildInputs = with pkgs; [ stdenv.cc.cc ];
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+    buildInputs = with pkgs; [stdenv.cc.cc];
 
     installPhase = ''
       runHook preInstall
@@ -91,11 +123,10 @@ in
 
       wrapProgram $out/bin/${name} \
         --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
-          pkgs.glibc
-       ]}"
+        pkgs.glibc
+      ]}"
 
       runHook postInstall
     '';
   };
-
 }
