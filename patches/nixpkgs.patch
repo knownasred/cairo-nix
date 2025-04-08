@@ -1,484 +1,75 @@
-From 8a716c174fc52b55038c78ae06b5c1afd70c6a55 Mon Sep 17 00:00:00 2001
-From: Junji Hashimoto <junji.hashimoto@gree.net>
-Date: Thu, 28 Nov 2024 21:26:55 +0900
-Subject: [PATCH 1/2] rustPlatform.importCargoLock: Support 'cargo-vendor
- --no-merge-sources' feature
+From d1329e36ba55e7d90e191ca1a8e70e9182f8883c Mon Sep 17 00:00:00 2001
+From: TomaSajt <62384384+TomaSajt@users.noreply.github.com>
+Date: Wed, 5 Mar 2025 17:17:17 +0100
+Subject: [PATCH 2/8] rustPlatform.fetchCargoVendor: allow duplicated
+ dependencies
 
+This is achieved by having subdirs in the vendor dir
 ---
- pkgs/build-support/rust/import-cargo-lock.nix | 72 +++++++++++++----
- .../rust/replace-workspace-values.py          | 40 ++++-----
- .../rust/test/import-cargo-lock/default.nix   |  1 +
- .../git-dependency-rev-with-hash/Cargo.lock   | 81 +++++++++++++++++++
- .../git-dependency-rev-with-hash/Cargo.toml   |  8 ++
- .../git-dependency-rev-with-hash/default.nix  | 31 +++++++
- .../git-dependency-rev-with-hash/src/main.rs  |  9 +++
- .../want.toml                                 |  2 +-
- 8 files changed, 210 insertions(+), 34 deletions(-)
- create mode 100644 pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.lock
- create mode 100644 pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.toml
- create mode 100644 pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/default.nix
- create mode 100644 pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/src/main.rs
-
-diff --git a/pkgs/build-support/rust/import-cargo-lock.nix b/pkgs/build-support/rust/import-cargo-lock.nix
-index e88931d0f383d..7ee6d29a59238 100644
---- a/pkgs/build-support/rust/import-cargo-lock.nix
-+++ b/pkgs/build-support/rust/import-cargo-lock.nix
-@@ -68,10 +68,26 @@ let
-     builtins.map nameGitSha (builtins.filter (pkg: lib.hasPrefix "git+" pkg.source) depPackages)
-   );
-
--  nameGitSha = pkg: let gitParts = parseGit pkg.source; in {
--    name = "${pkg.name}-${pkg.version}";
--    value = gitParts.sha;
--  };
-+  namesGitShasWithSha = builtins.listToAttrs (
-+    builtins.map nameGitShaWithSha (builtins.filter (pkg: lib.hasPrefix "git+" pkg.source) depPackages)
-+  );
-+
-+  nameGitSha = pkg:
-+    let
-+      gitParts = parseGit pkg.source;
-+    in {
-+      name = "${pkg.name}-${pkg.version}";
-+      value = gitParts.sha;
-+    };
-+
-+  nameGitShaWithSha = pkg:
-+    let
-+      gitParts = parseGit pkg.source;
-+      suffix = if builtins.isNull gitParts then "" else "-" + gitParts.sha;
-+    in {
-+      name = "${pkg.name}-${pkg.version}${suffix}";
-+      value = gitParts.sha;
-+    };
-
-   # Convert the attrset provided through the `outputHashes` argument to a
-   # a mapping from git commit SHA -> output hash.
-@@ -84,7 +100,7 @@ let
-   gitShaOutputHash = lib.mapAttrs' (nameVer: hash:
-     let
-       unusedHash = throw "A hash was specified for ${nameVer}, but there is no corresponding git dependency.";
--      rev = namesGitShas.${nameVer} or unusedHash; in {
-+      rev = namesGitShasWithSha.${nameVer} or namesGitShas.${nameVer} or unusedHash; in {
-       name = rev;
-       value = hash;
-     }) outputHashes;
-@@ -118,12 +134,13 @@ let
-     let
-       gitParts = parseGit pkg.source;
-       registryIndexUrl = lib.removePrefix "registry+" pkg.source;
-+      suffix = if builtins.isNull gitParts then "" else "-" + gitParts.sha;
-     in
-       if (lib.hasPrefix "registry+" pkg.source || lib.hasPrefix "sparse+" pkg.source)
-         && builtins.hasAttr registryIndexUrl registries then
-       let
-         crateTarball = fetchCrate pkg registries.${registryIndexUrl};
--      in runCommand "${pkg.name}-${pkg.version}" {} ''
-+      in runCommand "${pkg.name}-${pkg.version}${suffix}" {} ''
-         mkdir $out
-         tar xf "${crateTarball}" -C $out --strip-components=1
-
-@@ -133,13 +150,19 @@ let
-       else if gitParts != null then
-       let
-         missingHash = throw ''
--          No hash was found while vendoring the git dependency ${pkg.name}-${pkg.version}. You can add
-+          No hash was found while vendoring the git dependency ${pkg.name}-${pkg.version} or ${pkg.name}-${pkg.version}${suffix}. You can add
-           a hash through the `outputHashes` argument of `importCargoLock`:
-
-           outputHashes = {
-             "${pkg.name}-${pkg.version}" = "<hash>";
-           };
-
-+          or
-+
-+          outputHashes = {
-+            "${pkg.name}-${pkg.version}${suffix}" = "<hash>";
-+          };
-+
-           If you use `buildRustPackage`, you can add this attribute to the `cargoLock`
-           attribute set.
-         '';
-@@ -159,7 +182,7 @@ let
-             }
-           else
-             missingHash;
--      in runCommand "${pkg.name}-${pkg.version}" {} ''
-+      in runCommand "${pkg.name}-${pkg.version}${suffix}" {} ''
-         tree=${tree}
-
-         # If the target package is in a workspace, or if it's the top-level
-@@ -183,7 +206,7 @@ let
-           done
-
-           if [[ -z $crateCargoTOML ]]; then
--            >&2 echo "Cannot find path for crate '${pkg.name}-${pkg.version}' in the tree in: $tree"
-+            >&2 echo "Cannot find path for crate '${pkg.name}-${pkg.version}${suffix}' in the tree in: $tree"
-             exit 1
-           fi
-         fi
-@@ -202,12 +225,16 @@ let
-         # Cargo is happy with empty metadata.
-         printf '{"files":{},"package":null}' > "$out/.cargo-checksum.json"
-
--        # Set up configuration for the vendor directory.
-+        # Set up configuration for the vendor directory with package name and version.
-         cat > $out/.cargo-config <<EOF
-+        #pkg: ${pkg.name}
-+        #version: ${pkg.version}
-         [source."${gitParts.url}${lib.optionalString (gitParts ? type) "?${gitParts.type}=${gitParts.value}"}"]
-         git = "${gitParts.url}"
-         ${lib.optionalString (gitParts ? type) "${gitParts.type} = \"${gitParts.value}\""}
--        replace-with = "vendored-sources"
-+        replace-with = "vendored-sources-git-${gitParts.sha}"
-+        [source.vendored-sources-git-${gitParts.sha}]
-+        directory = "cargo-vendor-dir/git-${gitParts.sha}"
-         EOF
-       ''
-       else throw "Cannot handle crate source: ${pkg.source}";
-@@ -234,7 +261,7 @@ let
- replace-with = "vendored-sources"
-
- [source.vendored-sources]
--directory = "cargo-vendor-dir"
-+directory = "cargo-vendor-dir/registry"
- EOF
-
-     declare -A keysSeen
-@@ -247,17 +274,34 @@ registry = "$registry"
- replace-with = "vendored-sources"
- EOF
-     done
-+    mkdir $out/registry
-
-     for crate in ${toString depCrates}; do
-       # Link the crate directory, removing the output path hash from the destination.
--      ln -s "$crate" $out/$(basename "$crate" | cut -c 34-)
--
-+      # When the crate directory has a directory directive, putting it to git-* directory.
-       if [ -e "$crate/.cargo-config" ]; then
-         key=$(sed 's/\[source\."\(.*\)"\]/\1/; t; d' < "$crate/.cargo-config")
-+        directory=$(sed 's/directory = "\(.*\)"/\1/; t; d' < "$crate/.cargo-config")
-+        package_name=$(sed 's/#pkg: \(.*\)/\1/; t; d' < "$crate/.cargo-config")
-+        if [[ ! -z "$directory" ]]; then
-+          gitdir=$(basename "$directory")
-+          if [ ! -d $out/$gitdir ] ; then
-+            mkdir $out/$gitdir
-+          fi
-+          ln -s "$crate" $out/$gitdir/$(basename "$crate" | cut -c 34-)
-+          # This is to handle the case of referencing a package with a relative path.
-+          if [ ! -e "$out/$gitdir/$package_name" ] ; then
-+            ln -s "$crate" "$out/$gitdir/$package_name"
-+          fi
-+        else
-+          ln -s "$crate" $out/$(basename "$crate" | cut -c 34-)
-+        fi
-         if [[ -z ''${keysSeen[$key]} ]]; then
-           keysSeen[$key]=1
-           cat "$crate/.cargo-config" >> $out/.cargo/config.toml
-         fi
-+      else
-+        ln -s "$crate" $out/registry/$(basename "$crate" | cut -c 34-)
-       fi
-     done
-   '';
-diff --git a/pkgs/build-support/rust/replace-workspace-values.py b/pkgs/build-support/rust/replace-workspace-values.py
-index 003023ff2560a..fa9ba28336e40 100644
---- a/pkgs/build-support/rust/replace-workspace-values.py
-+++ b/pkgs/build-support/rust/replace-workspace-values.py
-@@ -31,34 +31,36 @@ def replace_key(
-         local_dep = table[key]
-         del local_dep["workspace"]
-
--        workspace_dep = workspace_manifest[section][key]
--
-         if section == "dependencies":
--            if isinstance(workspace_dep, str):
--                workspace_dep = {"version": workspace_dep}
-+            if key in workspace_manifest[section]:
-+                workspace_dep = workspace_manifest[section][key]
-+                if isinstance(workspace_dep, str):
-+                    workspace_dep = {"version": workspace_dep}
-
--            final: dict[str, Any] = workspace_dep.copy()
-+                final: dict[str, Any] = workspace_dep.copy()
-
--            merged_features = local_dep.pop("features", []) + workspace_dep.get("features", [])
--            if merged_features:
--                final["features"] = merged_features
-+                merged_features = local_dep.pop("features", []) + workspace_dep.get("features", [])
-+                if merged_features:
-+                    final["features"] = merged_features
-
--            local_default_features = local_dep.pop("default-features", None)
--            workspace_default_features = workspace_dep.get("default-features")
-+                local_default_features = local_dep.pop("default-features", None)
-+                workspace_default_features = workspace_dep.get("default-features")
-
--            if not workspace_default_features and local_default_features:
--                final["default-features"] = True
-+                if not workspace_default_features and local_default_features:
-+                    final["default-features"] = True
-
--            optional = local_dep.pop("optional", False)
--            if optional:
--                final["optional"] = True
-+                optional = local_dep.pop("optional", False)
-+                if optional:
-+                    final["optional"] = True
-
--            if local_dep:
--                raise Exception(f"Unhandled keys in inherited dependency {key}: {local_dep}")
-+                if local_dep:
-+                    raise Exception(f"Unhandled keys in inherited dependency {key}: {local_dep}")
-
--            table[key] = final
-+                table[key] = final
-         elif section == "package":
--            table[key] = workspace_dep
-+            if key in workspace_manifest[section]:
-+                workspace_dep = workspace_manifest[section][key]
-+                table[key] = workspace_dep
-
-         return True
-
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/default.nix b/pkgs/build-support/rust/test/import-cargo-lock/default.nix
-index 26e6487989c42..356aaa26a2c43 100644
---- a/pkgs/build-support/rust/test/import-cargo-lock/default.nix
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/default.nix
-@@ -7,6 +7,7 @@
-   basicDynamic = callPackage ./basic-dynamic { };
-   gitDependency = callPackage ./git-dependency { };
-   gitDependencyRev = callPackage ./git-dependency-rev { };
-+  gitDependencyRevWithHash = callPackage ./git-dependency-rev-with-hash { };
-   gitDependencyRevNonWorkspaceNestedCrate = callPackage ./git-dependency-rev-non-workspace-nested-crate { };
-   gitDependencyTag = callPackage ./git-dependency-tag { };
-   gitDependencyBranch = callPackage ./git-dependency-branch { };
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.lock b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.lock
-new file mode 100644
-index 0000000000000..a9735ae8d6833
---- /dev/null
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.lock
-@@ -0,0 +1,81 @@
-+# This file is automatically @generated by Cargo.
-+# It is not intended for manual editing.
-+version = 3
-+
-+[[package]]
-+name = "cfg-if"
-+version = "1.0.0"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-+
-+[[package]]
-+name = "getrandom"
-+version = "0.2.2"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "c9495705279e7140bf035dde1f6e750c162df8b625267cd52cc44e0b156732c8"
-+dependencies = [
-+ "cfg-if",
-+ "libc",
-+ "wasi",
-+]
-+
-+[[package]]
-+name = "git-dependency-rev-with-hash"
-+version = "0.1.0"
-+dependencies = [
-+ "rand",
-+]
-+
-+[[package]]
-+name = "libc"
-+version = "0.2.94"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "18794a8ad5b29321f790b55d93dfba91e125cb1a9edbd4f8e3150acc771c1a5e"
-+
-+[[package]]
-+name = "ppv-lite86"
-+version = "0.2.10"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
-+
-+[[package]]
-+name = "rand"
-+version = "0.8.3"
-+source = "git+https://github.com/rust-random/rand.git?rev=0.8.3#6ecbe2626b2cc6110a25c97b1702b347574febc7"
-+dependencies = [
-+ "libc",
-+ "rand_chacha",
-+ "rand_core",
-+ "rand_hc",
-+]
-+
-+[[package]]
-+name = "rand_chacha"
-+version = "0.3.0"
-+source = "git+https://github.com/rust-random/rand.git?rev=0.8.3#6ecbe2626b2cc6110a25c97b1702b347574febc7"
-+dependencies = [
-+ "ppv-lite86",
-+ "rand_core",
-+]
-+
-+[[package]]
-+name = "rand_core"
-+version = "0.6.1"
-+source = "git+https://github.com/rust-random/rand.git?rev=0.8.3#6ecbe2626b2cc6110a25c97b1702b347574febc7"
-+dependencies = [
-+ "getrandom",
-+]
-+
-+[[package]]
-+name = "rand_hc"
-+version = "0.3.0"
-+source = "git+https://github.com/rust-random/rand.git?rev=0.8.3#6ecbe2626b2cc6110a25c97b1702b347574febc7"
-+dependencies = [
-+ "rand_core",
-+]
-+
-+[[package]]
-+name = "wasi"
-+version = "0.10.2+wasi-snapshot-preview1"
-+source = "registry+https://github.com/rust-lang/crates.io-index"
-+checksum = "fd6fbd9a79829dd1ad0cc20627bf1ed606756a7f77edff7b66b7064f9cb327c6"
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.toml b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.toml
-new file mode 100644
-index 0000000000000..a51a262265644
---- /dev/null
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/Cargo.toml
-@@ -0,0 +1,8 @@
-+[package]
-+name = "git-dependency-rev-with-hash"
-+version = "0.1.0"
-+authors = ["Daniël de Kok <me@danieldk.eu>"]
-+edition = "2018"
-+
-+[dependencies]
-+rand = { git = "https://github.com/rust-random/rand.git", rev = "0.8.3" }
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/default.nix b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/default.nix
-new file mode 100644
-index 0000000000000..5229df709bfd1
---- /dev/null
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/default.nix
-@@ -0,0 +1,31 @@
-+{ lib, rustPlatform }:
-+let
-+  fs = lib.fileset;
-+in
-+rustPlatform.buildRustPackage {
-+  pname = "git-dependency-rev-with-hash";
-+  version = "0.1.0";
-+
-+  src = fs.toSource {
-+    root = ./.;
-+    fileset = fs.unions [
-+      ./Cargo.toml
-+      ./Cargo.lock
-+      ./src
-+    ];
-+  };
-+
-+  cargoLock = {
-+    lockFile = ./Cargo.lock;
-+    outputHashes = {
-+      "rand-0.8.3-6ecbe2626b2cc6110a25c97b1702b347574febc7" =
-+        "0l3p174bpwia61vcvxz5mw65a13ri3wy94z04xrnyy5lzciykz4f";
-+    };
-+  };
-+
-+  doInstallCheck = true;
-+
-+  installCheckPhase = ''
-+    $out/bin/git-dependency-rev-with-hash
-+  '';
-+}
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/src/main.rs b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/src/main.rs
-new file mode 100644
-index 0000000000000..50b4ed799e43e
---- /dev/null
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-rev-with-hash/src/main.rs
-@@ -0,0 +1,9 @@
-+use rand::Rng;
-+
-+fn main() {
-+    let mut rng = rand::thread_rng();
-+
-+    // Always draw zero :).
-+    let roll: u8 = rng.gen_range(0..1);
-+    assert_eq!(roll, 0);
-+}
-diff --git a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-workspace-inheritance/want.toml b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-workspace-inheritance/want.toml
-index ec1331455bece..cd1cb594a7698 100644
---- a/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-workspace-inheritance/want.toml
-+++ b/pkgs/build-support/rust/test/import-cargo-lock/git-dependency-workspace-inheritance/want.toml
-@@ -12,8 +12,8 @@ keywords = [
- bar = "1.0.0"
-
- [dependencies.foo]
-+version = "1.0.0"
- features = [
-     "cat",
-     "meow",
- ]
--version = "1.0.0"
-
-From b3d5702c47cff270e03718611a9f457cfe72692b Mon Sep 17 00:00:00 2001
-From: Junji Hashimoto <junji.hashimoto@gree.net>
-Date: Sat, 7 Dec 2024 14:22:58 +0900
-Subject: [PATCH 2/2] rustPlatform.fetchCargoVendor: Support 'cargo-vendor
- --no-merge-sources' feature
-
----
- pkgs/build-support/rust/fetch-cargo-vendor-util.py | 11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+ .../rust/fetch-cargo-vendor-util.py           | 21 +++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
 
 diff --git a/pkgs/build-support/rust/fetch-cargo-vendor-util.py b/pkgs/build-support/rust/fetch-cargo-vendor-util.py
-index 697387f292ba7..45ea10c277efd 100644
+index 6f2f7672560190..5807720b78bdb2 100644
 --- a/pkgs/build-support/rust/fetch-cargo-vendor-util.py
 +++ b/pkgs/build-support/rust/fetch-cargo-vendor-util.py
-@@ -205,13 +205,14 @@ def extract_crate_tarball_contents(tarball_path: Path, crate_out_dir: Path) -> N
- def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
-     lockfile_path = vendor_staging_dir / "Cargo.lock"
-     out_dir.mkdir(exist_ok=True)
-+    (out_dir / "registry").mkdir(exist_ok=True)
-     shutil.copy(lockfile_path, out_dir / "Cargo.lock")
-
-     cargo_toml = load_toml(lockfile_path)
+@@ -234,10 +234,10 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
+     lockfile_version = get_lockfile_version(cargo_lock_toml)
 
      config_lines = [
-         '[source.vendored-sources]',
+-        '[source.vendored-sources]',
 -        'directory = "@vendor@"',
++        '[source.vendored-sources-registry]',
 +        'directory = "@vendor@/registry"',
          '[source.crates-io]',
-         'replace-with = "vendored-sources"',
+-        'replace-with = "vendored-sources"',
++        'replace-with = "vendored-sources-registry"',
      ]
-@@ -226,13 +227,14 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
+
+     seen_source_keys = set()
+@@ -249,8 +249,7 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
+
          source: str = pkg["source"]
 
-         dir_name = f"{pkg["name"]}-{pkg["version"]}"
+-        dir_name = f"{pkg["name"]}-{pkg["version"]}"
 -        crate_out_dir = out_dir / dir_name
++        crate_dir_name = f"{pkg["name"]}-{pkg["version"]}"
 
          if source.startswith("git+"):
 
-             source_info = parse_git_source(pkg["source"])
+@@ -259,6 +258,9 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
              git_sha_rev = source_info["git_sha_rev"]
              git_tree = vendor_staging_dir / "git" / git_sha_rev
-+            (out_dir / f"git-{git_sha_rev}").mkdir(exist_ok=True)
-+            crate_out_dir = out_dir / f"git-{git_sha_rev}" / dir_name
 
++            crate_out_dir = out_dir / f"git-{git_sha_rev}" / crate_dir_name
++            crate_out_dir.parent.mkdir(exist_ok=True)
++
              copy_and_patch_git_crate_subtree(git_tree, pkg["name"], crate_out_dir)
 
-@@ -251,10 +253,13 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
+             # git based crates allow having no checksum information
+@@ -272,17 +274,24 @@ def create_vendor(vendor_staging_dir: Path, out_dir: Path) -> None:
+
+             seen_source_keys.add(source_key)
+
++            config_lines.append(f'[source.vendored-sources-git-{git_sha_rev}]')
++            config_lines.append(f'directory = "@vendor@/git-{git_sha_rev}"')
++
+             config_lines.append(f'[source."{source_key}"]')
              config_lines.append(f'git = "{source_info["url"]}"')
              if source_info["type"] is not None:
                  config_lines.append(f'{source_info["type"]} = "{source_info["value"]}"')
 -            config_lines.append('replace-with = "vendored-sources"')
++
 +            config_lines.append(f'replace-with = "vendored-sources-git-{git_sha_rev}"')
-+            config_lines.append(f'[source.vendored-sources-git-{git_sha_rev}]')
-+            config_lines.append(f'directory = "@vendor@/git-{git_sha_rev}"')
 
          elif source.startswith("registry+"):
 
-+            crate_out_dir = out_dir / "registry" / dir_name
              filename = f"{pkg["name"]}-{pkg["version"]}.tar.gz"
              tarball_path = vendor_staging_dir / "tarballs" / filename
+
++            crate_out_dir = out_dir / "registry" / crate_dir_name
++            crate_out_dir.parent.mkdir(exist_ok=True)
++
+             extract_crate_tarball_contents(tarball_path, crate_out_dir)
+
+             # non-git based crates need the package checksum at minimum
