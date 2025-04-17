@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "0.39.1";
+  version = "0.39.3";
   buildTargz = builtins.fetchurl {
     url = "https://github.com/cartridge-gg/slot/releases/download/v${version}/slot_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:15mflxqi2vgx8gjg9jhfyycr6ajrn4ga2a82339fppya45w3b0ay";
+    sha256 = "sha256:06zp5y4j5g9kwlyxygkmzgibr9dc5sv93lgbf1dmn26v1lz4lca7";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
