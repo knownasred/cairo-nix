@@ -74,6 +74,8 @@
 
       doCheck = false;
 
+      useFetchCargoVendor = true;
+
       buildInputs = lib.optional stdenv.isDarwin [
         darwin.apple_sdk.frameworks.CoreFoundation
       ];
@@ -429,6 +431,22 @@
         cargoLock = null;
       };
     }
+
+    {
+      toolchainVersion = "2.11.4";
+      cairo = {
+        version = "2.11.4";
+        srcHash = "";
+        archiveHash = "sha256-3EiNjKT5kyTLoxiAW4UseHdW0Ox/93dlnh8F+xfvwvo=";
+        cargoHash = "";
+      };
+      scarb = {
+        version = "2.11.4";
+        srcHash = "sha256-Xq5tIGJV9gBKhBZ0ggCdGOYGc5/3MaEUQL+ToLJdGC4=";
+        cargoHash = "sha256-3Eu3FnuGhqZHl2hgSXc2kmp08y/T9x0N8lLD0DULQ6w=";
+        cargoLock = null;
+      };
+    }
   ];
 
   toolchains = builtins.listToAttrs (builtins.map (v: {
@@ -441,7 +459,7 @@ in {
   cairo-bin =
     toolchains
     // {
-      stable = toolchains."2.9.4";
-      beta = toolchains."2.9.4";
+      stable = toolchains."2.11.4";
+      beta = toolchains."2.11.4";
     };
 }

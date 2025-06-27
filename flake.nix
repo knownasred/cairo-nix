@@ -2,20 +2,19 @@
   description = "Cairo toolchain in nix";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/release-24.11";
+    nixpkgs.url = "github:nixos/nixpkgs/release-25.05";
     oxalica = {
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    naersk.url = "github:nix-community/naersk";
+    crane.url = "github:ipetkov/crane";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = {
+  outputs = inputs @ {
     nixpkgs,
     flake-utils,
     oxalica,
-    naersk,
     ...
   }: let
     overlay = import ./overlay.nix {
@@ -83,13 +82,12 @@
       packages =
         dojo-git.flattened
         // {
-          default = pkgs.cairo-bin.stable.scarb;
-          inherit (pkgs.cairo-bin.stable) cairo scarb;
-
           dojo = dojo-download.dojo;
 
           cairo-beta = pkgs.cairo-bin.beta.cairo;
           scarb-beta = pkgs.cairo-bin.beta.scarb;
+
+          scarb = import ./packages/scarb-download.nix {inherit pkgs lib;};
 
           slot = import ./packages/slot-download.nix {inherit pkgs lib;};
           starkli = import ./packages/starkli.nix {inherit pkgs lib;};

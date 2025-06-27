@@ -5,15 +5,15 @@
   pkgs,
   ...
 }: let
-  version = "1.4.0";
-  buildTargz = builtins.fetchurl {
+  version = "1.5.1";
+  sozoTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/dojo/releases/download/v${version}/dojo_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:02s1kkpx7g85gp8l43jayyp1qj5nd0xjjyj4q99rwhmprc9y0wrm";
+    sha256 = "sha256:1sbs29l74bwhapqqzf6ckfds7aj7qz4h84q2iyi1wcbr0hmy0czw";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
     name = "dojo-artifacts";
-    src = buildTargz;
+    src = sozoTargz;
     phases = ["unpackPhase"];
     unpackPhase = ''
       mkdir -p $out
@@ -27,33 +27,6 @@
       zlib
     ];
 in {
-  dojo = pkgs.stdenv.mkDerivation {
-    name = "dojo";
-    src = artifacts;
-    phases = ["unpackPhase" "installPhase"];
-
-    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
-    buildInputs = with pkgs; [
-      stdenv.cc.cc
-      glibc
-      zlib
-    ];
-
-    autoPatchelfIgnoreMissingDeps = "false";
-    dontAutoPatchelf = "true";
-
-    installPhase = ''
-      runHook preInstall
-
-      for file in ./*; do
-        install -m755 -D "$file" "$out/bin/$file"
-        autoPatchelf $out/bin/$file
-      done
-
-      runHook postInstall
-    '';
-  };
-
   dojo-language-server = pkgs.stdenv.mkDerivation {
     name = "dojo-language-server";
     src = artifacts;
