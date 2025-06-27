@@ -33,13 +33,13 @@ in
     cargoHash = "sha256-6pB/bklkWlTcGRUm1fb1Qi0gOtGS34kKj/ec0T/+VS0=";
 
     # Workaround for https://github.com/NixOS/nixpkgs/pull/300532
-    cargoDepsHook = ''
-      fixStarknetLints() {
-        echo cargoDepsCopy=$cargoDepsCopy
-        sed -i '/workspace = true/d' $cargoDepsCopy/*/starknet*/Cargo.toml
-        # Remove all lints.
-        sed -n '/\[workspace.lints\]/q;p' $cargoDepsCopy/*/starknet-0.12.0/Cargo.toml
-      }
-      prePatchHooks+=(fixStarknetLints)
-    '';
+    # cargoDepsHook = ''
+    #   fixStarknetLints() {
+    #     echo cargoDepsCopy=$cargoDepsCopy
+    #     sed -i '/workspace = true/d' $cargoDepsCopy/*/starknet*/Cargo.toml
+    #     # Remove all lints.
+    #     sed -n '/\[workspace.lints\]/q;p' $cargoDepsCopy/*/starknet-0.12.0/Cargo.toml
+    #   }
+    #   prePatchHooks+=(fixStarknetLints)
+    # '';
   }
