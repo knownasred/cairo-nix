@@ -20,12 +20,6 @@
       tar -xzf $src -C $out
     '';
   };
-
-  libraries = with pkgs;
-    lib.makeLibraryPath [
-      glibc
-      zlib
-    ];
 in {
   dojo-language-server = pkgs.stdenv.mkDerivation {
     name = "dojo-language-server";

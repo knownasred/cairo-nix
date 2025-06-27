@@ -38,20 +38,7 @@
       };
     }
     // flake-utils.lib.eachDefaultSystem (system: let
-      patchedPkgs =
-        (import nixpkgs {
-          inherit system;
-        })
-        .applyPatches
-        {
-          name = "nixpkgs-unstable-patched";
-          src = nixpkgs;
-          patches = [
-            ./patches/nixpkgs.patch
-          ];
-        };
-
-      pkgs = import patchedPkgs {
+      pkgs = import nixpkgs {
         inherit system;
         overlays = [
           overlay
