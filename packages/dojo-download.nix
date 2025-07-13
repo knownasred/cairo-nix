@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "1.5.1";
+  version = "1.6.0-alpha.2";
   sozoTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/dojo/releases/download/v${version}/dojo_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:1sbs29l74bwhapqqzf6ckfds7aj7qz4h84q2iyi1wcbr0hmy0czw";
+    sha256 = "sha256:00r29nslpb3ws9prckv4c134ivyr1lf23i8mvha018p2ka4l0q2q";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
@@ -21,6 +21,8 @@
     '';
   };
 in {
+  dojo = artifacts;
+
   dojo-language-server = pkgs.stdenv.mkDerivation {
     name = "dojo-language-server";
     src = artifacts;
