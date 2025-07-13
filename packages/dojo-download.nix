@@ -14,23 +14,32 @@
   artifacts = pkgs.stdenv.mkDerivation {
     name = "dojo-artifacts";
     src = sozoTargz;
-    phases = ["unpackPhase"];
+    phases = ["unpackPhase" "installCheckPhase"];
 
     nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
-    buildInputs = with pkgs; [stdenv.cc.cc];
+    buildInputs = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      openssl
+    ];
+    doInstallCheck = true;
 
     unpackPhase = ''
       mkdir -p $out/bin
       tar -xzf $src -C $out/bin
 
-      for file in $out/bin/*; do
-        if [ -f "$file" ] && [ -x "$file" ]; then
-          wrapProgram "$file" \
-            --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [
-            pkgs.glibc
-          ]}"
-        fi
-      done
+      # Run autoPatchelf to fix the interpreter and add missing libraries
+      autoPatchelf $out/bin
+
+      runHook postInstall
+    '';
+
+    installCheckPhase = ''
+      echo "Validating sozo..."
+      $out/bin/sozo --version || (echo "Error: sozo failed to launch" && exit 1)
+
+      echo "Validating dojo-language-server..."
+      $out/bin/dojo-language-server --version || (echo "Error: dojo-language-server failed to launch" && exit 1)
     '';
   };
 in {
