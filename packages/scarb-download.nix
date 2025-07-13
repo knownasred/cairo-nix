@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "2.11.4";
+  version = "2.10.1";
   sozoTargz = builtins.fetchurl {
     url = "https://github.com/software-mansion/scarb/releases/download/v${version}/scarb-v${version}-x86_64-unknown-linux-musl.tar.gz";
-    sha256 = "sha256:14isjglp13jzgbn6ycpfprnjhrpvhandzfkj4va5c7k7balik749";
+    sha256 = "sha256:0czwixqf39g65r9f6mn7s65kba8wh6y43wm16ddqifdaqbxfg6km";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
