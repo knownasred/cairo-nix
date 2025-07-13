@@ -50,6 +50,8 @@
 
       dojo-git = import ./packages/dojo.nix {inherit pkgs lib;};
       dojo-download = import ./packages/dojo-download.nix {inherit pkgs lib;};
+      katana-download = import ./packages/katana-download.nix {inherit pkgs lib;};
+      torii-download = import ./packages/torii-download.nix {inherit pkgs lib;};
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -78,6 +80,9 @@
 
           slot = import ./packages/slot-download.nix {inherit pkgs lib;};
           starkli = import ./packages/starkli.nix {inherit pkgs lib;};
+          
+          katana = katana-download;
+          torii = torii-download;
         };
     });
 }
