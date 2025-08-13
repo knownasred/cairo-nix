@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: let
-  version = "0.39.1";
+  version = "0.49.1";
   src = pkgs.fetchFromGitHub {
     owner = "cartridge-gg";
     repo = "slot";
