@@ -27,6 +27,11 @@ in
       mkdir -p $out/bin
       tar -xzf $src -C $out/bin
 
+      # Move everyting from the sozo-* subdir to the root
+      mv $out/bin/scarb-*/bin/* $out/bin/
+
+      rm -r $out/bin/scarb-*
+
       # Run autoPatchelf to fix the interpreter and add missing libraries
       autoPatchelf $out/bin
 
