@@ -78,9 +78,11 @@
 
           scarb = import ./packages/scarb-download.nix {inherit pkgs lib;};
 
+          scarb-nightly = import ./packages/scarb-nightly.nix {inherit pkgs lib;};
+
           slot = import ./packages/slot-download.nix {inherit pkgs lib;};
           starkli = import ./packages/starkli.nix {inherit pkgs lib;};
-          
+
           katana = katana-download;
           torii = torii-download;
         };

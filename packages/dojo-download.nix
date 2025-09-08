@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "1.6.2";
+  version = "1.7.0-alpha.2";
   sozoTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/dojo/releases/download/v${version}/dojo_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:0a4sv9zpb017gax3l67xc9wf1rvkznd3mvgsgd4qyml08ga7warz";
+    sha256 = "sha256:0yjbiz1fsjh53qb09594ijnm63pzdkkns42yvwx6sniq1x5xn1zm";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
@@ -37,9 +37,6 @@
     installCheckPhase = ''
       echo "Validating sozo..."
       $out/bin/sozo --version || (echo "Error: sozo failed to launch" && exit 1)
-
-      echo "Validating dojo-language-server..."
-      $out/bin/dojo-language-server --version || (echo "Error: dojo-language-server failed to launch" && exit 1)
     '';
   };
 in {
