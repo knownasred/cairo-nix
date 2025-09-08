@@ -10,23 +10,26 @@
     url = "https://github.com/software-mansion/scarb-nightlies/releases/download/${version}/scarb-${version}-x86_64-unknown-linux-gnu.tar.gz";
     sha256 = "sha256:1fx39rhjmfm75xax4m6374in73yk253f7b5hb56s46ckbf2938sl";
   };
-
-  artifacts = pkgs.stdenv.mkDerivation {
-    name = "scarb-artifacts";
-    src = sozoTargz;
-    phases = ["unpackPhase"];
-    unpackPhase = ''
-      mkdir -p $out
-      tar -xzf $src -C $out
-    '';
-  };
 in
   pkgs.stdenv.mkDerivation {
     name = "scarb";
-    src = artifacts;
-    phases = ["unpackPhase" "installPhase"];
-    installPhase = ''
+    src = sozoTargz;
+
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+
+    buildInputs = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      openssl
+    ];
+
+    unpackPhase = ''
       mkdir -p $out/bin
-      mv ./scarb-*/* $out
+      tar -xzf $src -C $out/bin
+
+      # Run autoPatchelf to fix the interpreter and add missing libraries
+      autoPatchelf $out/bin
+
+      runHook postInstall
     '';
   }
