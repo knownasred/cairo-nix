@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "nightly-2025-07-19";
+  version = "dev-2025-09-05";
   sozoTargz = builtins.fetchurl {
     url = "https://github.com/software-mansion/scarb-nightlies/releases/download/${version}/scarb-${version}-x86_64-unknown-linux-gnu.tar.gz";
-    sha256 = "sha256:1fx39rhjmfm75xax4m6374in73yk253f7b5hb56s46ckbf2938sl";
+    sha256 = "sha256:1ghl2zxqnyb0778vf1msvk096vvp7q5mgya2ibkb8aq5630qg637";
   };
 in
   pkgs.stdenv.mkDerivation {
