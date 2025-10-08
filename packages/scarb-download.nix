@@ -7,8 +7,8 @@
 }: let
   version = "2.12.2";
   sozoTargz = builtins.fetchurl {
-    url = "https://github.com/software-mansion/scarb/releases/download/v${version}/scarb-v${version}-x86_64-unknown-linux-musl.tar.gz";
-    sha256 = "sha256:18w9y10w73hxslcqp522sdx0jqgfqzcay3yqp5c3f6i03rr69qvh";
+    url = "https://github.com/software-mansion/scarb/releases/download/v${version}/scarb-v${version}-x86_64-unknown-linux-gnu.tar.gz";
+    sha256 = "sha256:0l7741g9ggl4l062zd1z5410b4hfz4sj4hw7pa5nmcg5jlpwhwfy";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
@@ -28,5 +28,16 @@ in
     installPhase = ''
       mkdir -p $out/bin
       mv ./scarb-*/* $out
+
+      # Run autoPatchelf to fix the interpreter and add missing libraries
+      autoPatchelf $out/bin
     '';
+
+    nativeBuildInputs = with pkgs; [autoPatchelfHook makeWrapper];
+
+    buildInputs = with pkgs; [
+      stdenv.cc.cc
+      zlib
+      openssl
+    ];
   }
