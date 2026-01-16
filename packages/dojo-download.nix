@@ -5,10 +5,10 @@
   pkgs,
   ...
 }: let
-  version = "1.7.1";
+  version = "1.8.0";
   sozoTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/dojo/releases/download/v${version}/dojo_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:1qifx7p36i6dcyl4jjkk76gzhmpw9vqivzm7y7n0n6c7mmpwjwid";
+    sha256 = "sha256:1lm7xld3f3qzd06h2qs2f9dn5azmpp6vf7acwyprnp4hf769a02i";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {

@@ -3,10 +3,10 @@
   pkgs,
   ...
 }: let
-  version = "1.6.0";
+  version = "1.8.10";
   toriiTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/torii/releases/download/v${version}/torii_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:0rw4g5azql84cizry2h1w7r12r017g65vwg95mm2lyvhb0m3g6jf";
+    sha256 = "sha256:1shpi5rvl83238vcij115drvq9zk1njaq1var6xx8ycwks3m47sn";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {

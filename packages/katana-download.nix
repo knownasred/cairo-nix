@@ -3,10 +3,10 @@
   pkgs,
   ...
 }: let
-  version = "1.6.3";
+  version = "1.7.0";
   katanaTargz = builtins.fetchurl {
     url = "https://github.com/dojoengine/katana/releases/download/v${version}/katana_v${version}_linux_amd64.tar.gz";
-    sha256 = "sha256:0j5cdqq2kjvc1jfzw7aap1sfk9xxklrfjv8hm1iv040jxldffvfd";
+    sha256 = "sha256:19dv9ni5bny0mh62c1i9ndr421w1ifl821xa7vlblbidas7glxvi";
   };
 
   artifacts = pkgs.stdenv.mkDerivation {
