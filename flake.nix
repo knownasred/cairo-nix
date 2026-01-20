@@ -52,6 +52,7 @@
       dojo-download = import ./packages/dojo-download.nix {inherit pkgs lib;};
       katana-download = import ./packages/katana-download.nix {inherit pkgs lib;};
       torii-download = import ./packages/torii-download.nix {inherit pkgs lib;};
+      sozo-download = import ./packages/sozo-download.nix {inherit pkgs lib;};
     in {
       formatter = pkgs.nixpkgs-fmt;
 
@@ -85,6 +86,7 @@
 
           katana = katana-download;
           torii = torii-download;
+          sozo = sozo-download;
         };
     });
 }
